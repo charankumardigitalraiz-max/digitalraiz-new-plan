@@ -1,0 +1,299 @@
+================================================================================
+WAYFER API CURL COMMANDS - ADMIN CARPOOL MANAGEMENT (RIDES & BOOKINGS)
+Base URL: http://localhost:5000/api/admin/carpool (or http://localhost:5001/api/admin/carpool)
+================================================================================
+
+All admin carpool endpoints require an active Bearer Token of a user with role 'admin'.
+
+================================================================================
+A. ADMIN RIDE MANAGEMENT
+================================================================================
+
+1. GET ALL RIDES (With pagination, status filtering, and keyword search)
+--------------------------------------------------------------------------------
+curl -X GET "http://localhost:5000/api/admin/carpool/rides?status=active&page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/rides?status=active&page=1&limit=20" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "cardCount": {
+      "totalRides": 25,
+      "activeRides": 18,
+      "upcomingRides": 14,
+      "completedRides": 5,
+      "cancelledRides": 2
+    },
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1,
+    "rides": [
+      {
+        "id": 1,
+        "publisherId": 1,
+        "publisher": {
+          "id": 1,
+          "name": "Rajender Reddy",
+          "email": "rajender@example.com",
+          "phone": "+919876543210",
+          "role": "user"
+        },
+        "origin": {
+          "address": "Kukatpally, Hyderabad, Telangana",
+          "lat": 17.4965678,
+          "lng": 78.392344
+        },
+        "destination": {
+          "address": "Warangal, Warangal mandal, Warangal, Telangana",
+          "lat": 17.9820644,
+          "lng": 79.5970954
+        },
+        "departureTime": "2026-10-25T08:30:00.000Z",
+        "availableSeats": 3,
+        "totalSeats": 3,
+        "pricePerSeat": 250,
+        "vehicleModel": "Honda City 2022",
+        "vehicleNumber": "TS-09-AB-1234",
+        "stops": [],
+        "estimatedDistanceKm": 142.5,
+        "notes": "AC on, no smoking, trunk space available.",
+        "status": "active",
+        "createdAt": "2026-10-23T14:30:00.000Z",
+        "updatedAt": "2026-10-23T14:30:00.000Z"
+      }
+    ]
+  }
+}
+
+
+2. GET RIDE DETAILS & ASSOCIATED PASSENGER BOOKINGS BY RIDE ID
+--------------------------------------------------------------------------------
+curl -X GET http://localhost:5000/api/admin/carpool/rides/1 \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/rides/1" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "ride": {
+      "id": 1,
+      "publisherId": 1,
+      "origin": {
+        "address": "Kukatpally, Hyderabad, Telangana",
+        "lat": 17.4965678,
+        "lng": 78.392344
+      },
+      "destination": {
+        "address": "Warangal, Warangal mandal, Warangal, Telangana",
+        "lat": 17.9820644,
+        "lng": 79.5970954
+      },
+      "departureTime": "2026-10-25T08:30:00.000Z",
+      "availableSeats": 1,
+      "totalSeats": 3,
+      "pricePerSeat": 250,
+      "vehicleModel": "Honda City 2022",
+      "vehicleNumber": "TS-09-AB-1234",
+      "stops": [],
+      "estimatedDistanceKm": 142.5,
+      "notes": "AC on, no smoking, trunk space available.",
+      "status": "active",
+      "createdAt": "2026-10-23T14:30:00.000Z"
+    },
+    "passengerList": [
+      {
+        "bookingId": 1,
+        "passengerId": 2,
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "phone": "+919812345678",
+        "from": "Hitech City, Hyderabad, Telangana",
+        "to": "Warangal, Warangal mandal, Warangal, Telangana",
+        "seatsBooked": 2,
+        "totalAmount": 500,
+        "paymentStatus": "paid",
+        "bookingStatus": "confirmed",
+        "bookedAt": "2026-10-23T14:35:00.000Z"
+      }
+    ],
+    "totalPassengers": 1,
+    "totalSeatsOccupied": 2
+  }
+}
+
+
+3. UPDATE RIDE STATUS (active, completed, cancelled)
+--------------------------------------------------------------------------------
+curl -X PATCH http://localhost:5000/api/admin/carpool/rides/1/status \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "status": "cancelled"
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/rides/1/status" -Method Patch -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"status":"cancelled"}'
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Ride status updated to 'cancelled' successfully",
+  "data": {
+    "ride": {
+      "id": 1,
+      "status": "cancelled",
+      "updatedAt": "2026-10-23T14:40:00.000Z"
+    }
+  }
+}
+
+
+4. DELETE A RIDE (Admin Override)
+--------------------------------------------------------------------------------
+curl -X DELETE http://localhost:5000/api/admin/carpool/rides/1 \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/rides/1" -Method Delete -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Ride deleted permanently by Admin"
+}
+
+
+================================================================================
+B. ADMIN BOOKING MANAGEMENT
+================================================================================
+
+5. GET ALL BOOKINGS (With pagination, status filtering, passengerId, rideId)
+--------------------------------------------------------------------------------
+curl -X GET "http://localhost:5000/api/admin/carpool/bookings?bookingStatus=confirmed&page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/bookings?bookingStatus=confirmed&page=1&limit=20" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1,
+    "bookings": [
+      {
+        "id": 1,
+        "rideId": 1,
+        "passengerId": 2,
+        "seatsBooked": 2,
+        "totalAmount": 500,
+        "paymentStatus": "paid",
+        "bookingStatus": "confirmed",
+        "createdAt": "2026-10-23T14:35:00.000Z",
+        "updatedAt": "2026-10-23T14:35:00.000Z"
+      }
+    ]
+  }
+}
+
+
+6. GET BOOKING DETAILS BY ID (Includes ride info)
+--------------------------------------------------------------------------------
+curl -X GET http://localhost:5000/api/admin/carpool/bookings/1 \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/bookings/1" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "booking": {
+      "id": 1,
+      "rideId": 1,
+      "passengerId": 2,
+      "seatsBooked": 2,
+      "totalAmount": 500,
+      "paymentStatus": "paid",
+      "bookingStatus": "confirmed",
+      "createdAt": "2026-10-23T14:35:00.000Z"
+    },
+    "ride": {
+      "id": 1,
+      "origin": {
+        "address": "Kukatpally, Hyderabad, Telangana",
+        "lat": 17.4965678,
+        "lng": 78.392344
+      },
+      "destination": {
+        "address": "Warangal, Warangal mandal, Warangal, Telangana",
+        "lat": 17.9820644,
+        "lng": 79.5970954
+      },
+      "departureTime": "2026-10-25T08:30:00.000Z",
+      "pricePerSeat": 250,
+      "availableSeats": 1
+    }
+  }
+}
+
+
+7. UPDATE BOOKING STATUS (confirmed, cancelled, completed)
+--------------------------------------------------------------------------------
+curl -X PATCH http://localhost:5000/api/admin/carpool/bookings/1/status \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "bookingStatus": "completed"
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/bookings/1/status" -Method Patch -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"bookingStatus":"completed"}'
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Booking status updated to 'completed' successfully",
+  "data": {
+    "booking": {
+      "id": 1,
+      "bookingStatus": "completed",
+      "updatedAt": "2026-10-23T14:45:00.000Z"
+    }
+  }
+}
+
+
+8. CANCEL A BOOKING WITH AUTOMATIC SEAT RESTORATION TO RIDE
+--------------------------------------------------------------------------------
+curl -X POST http://localhost:5000/api/admin/carpool/bookings/1/cancel \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/bookings/1/cancel" -Method Post -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Booking cancelled and seats restored to ride successfully",
+  "data": {
+    "booking": {
+      "id": 1,
+      "bookingStatus": "cancelled",
+      "updatedAt": "2026-10-23T14:50:00.000Z"
+    }
+  }
+}
+================================================================================
