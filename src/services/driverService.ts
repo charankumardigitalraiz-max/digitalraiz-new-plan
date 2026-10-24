@@ -40,21 +40,25 @@ class DriverService {
     }
 
     try {
-      const response = await apiClient.get<DriversApiResponse>('/api/admin/carpool/drivers', {
+      const response: any = await apiClient.get<DriversApiResponse>('/api/admin/carpool/drivers', {
         params: queryParams
       });
 
-      const data = response?.data;
-      if (data && Array.isArray(data.drivers)) {
-        const mappedDrivers: Driver[] = data.drivers.map((d) => this.mapBackendDriverToDriver(d));
-        const total = data.pagination?.total ?? data.total ?? mappedDrivers.length;
-        const page = data.pagination?.page ?? data.page ?? (params?.page || 1);
-        const limit = data.pagination?.limit ?? data.limit ?? (params?.limit || 20);
-        const totalPages = data.pagination?.totalPages ?? data.totalPages ?? Math.max(1, Math.ceil(total / limit));
+      const data = response?.data || response;
+      const driversRaw = Array.isArray(data?.drivers)
+        ? data.drivers
+        : (Array.isArray(response?.drivers) ? response.drivers : null);
+
+      if (driversRaw) {
+        const mappedDrivers: Driver[] = driversRaw.map((d: any) => this.mapBackendDriverToDriver(d));
+        const total = data.pagination?.total ?? data.total ?? response?.total ?? mappedDrivers.length;
+        const page = data.pagination?.page ?? data.page ?? response?.page ?? (params?.page || 1);
+        const limit = data.pagination?.limit ?? data.limit ?? response?.limit ?? (params?.limit || 20);
+        const totalPages = data.pagination?.totalPages ?? data.totalPages ?? response?.totalPages ?? Math.max(1, Math.ceil(total / limit));
         const counts: DriverCounts = {
-          verified: data.counts?.verified ?? mappedDrivers.filter((d) => d.verificationStatus === 'verified' || d.KYCStatus === 'verified').length,
-          pending: data.counts?.pending ?? mappedDrivers.filter((d) => d.verificationStatus === 'pending' || d.KYCStatus === 'pending').length,
-          rejected: data.counts?.rejected ?? mappedDrivers.filter((d) => d.verificationStatus === 'rejected' || d.KYCStatus === 'rejected').length
+          verified: data.counts?.verified ?? response?.counts?.verified ?? mappedDrivers.filter((d) => d.verificationStatus === 'verified' || d.KYCStatus === 'verified').length,
+          pending: data.counts?.pending ?? response?.counts?.pending ?? mappedDrivers.filter((d) => d.verificationStatus === 'pending' || d.KYCStatus === 'pending').length,
+          rejected: data.counts?.rejected ?? response?.counts?.rejected ?? mappedDrivers.filter((d) => d.verificationStatus === 'rejected' || d.KYCStatus === 'rejected').length
         };
         const pagination: CarpoolPagination = {
           total,
@@ -209,6 +213,11 @@ class DriverService {
       status = 'verified';
     }
 
+    const isDocUploaded = Boolean(d.govtIdProof || (d.idDocument && d.idDocument !== 'Document Pending Upload'));
+    const docLabel = d.govtIdNumber
+      ? `ID: ${d.govtIdNumber}`
+      : (isDocUploaded ? 'Document Uploaded' : 'Document Pending Upload');
+
     return {
       id: String(d.id),
       name: d.name || 'Unnamed Driver',
@@ -218,15 +227,15 @@ class DriverService {
       phone: d.phone || 'N/A',
       email: d.email || 'N/A',
       verificationStatus: status,
-      KYCStatus: d.KYCStatus,
-      isKYC: d.isKYC,
-      isEmailVerified: d.isEmailVerified,
-      idDocument: d.idDocument || (d.govtIdNumber ? `ID: ${d.govtIdNumber}` : 'Document Pending Upload'),
+      KYCStatus: d.KYCStatus || status,
+      isKYC: d.isKYC !== undefined ? d.isKYC : status === 'verified',
+      isEmailVerified: d.isEmailVerified !== undefined ? d.isEmailVerified : status === 'verified',
+      idDocument: docLabel,
       govtIdNumber: d.govtIdNumber,
-      govtIdProof: d.govtIdProof,
-      drivingLicenseNumber: d.drivingLicenseNumber || 'DL-PENDING',
-      vehicleModel: d.vehicleModel || 'Vehicle Pending',
-      vehiclePlate: d.vehiclePlate || 'Not provided',
+      govtIdProof: d.govtIdProof || (typeof d.idDocument === 'string' && d.idDocument.includes('/') ? d.idDocument : null),
+      drivingLicenseNumber: d.drivingLicenseNumber || d.govtIdNumber || 'DL-PENDING',
+      vehicleModel: d.vehicleModel && d.vehicleModel !== 'Not specified' ? d.vehicleModel : 'Vehicle Pending',
+      vehiclePlate: d.vehiclePlate && d.vehiclePlate !== 'Not provided' ? d.vehiclePlate : 'Plate Pending',
       vehicleColor: d.vehicleColor || 'Standard',
       joinedDate: d.joinedDate || 'Recently'
     };

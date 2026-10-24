@@ -20,7 +20,7 @@ import { Header } from './components/layout/Header';
 import { GlobalOverview } from './components/overview/GlobalOverview';
 import { GlobalUsersView } from './components/users/GlobalUsersView';
 import { GlobalUserDetailView } from './components/users/GlobalUserDetailView';
-import { CarpoolDashboard } from './components/carpool/CarpoolDashboard';
+import { CarpoolBookingList } from './components/carpool/CarpoolBookingList';
 import { CarpoolOverview } from './components/carpool/CarpoolOverview';
 import { DriverVerificationScreen } from './components/carpool/DriverVerificationScreen';
 import { RideDetailScreen } from './components/carpool/RideDetailScreen';
@@ -383,7 +383,7 @@ export function App() {
             <Route
               path="/carpooling/rides"
               element={
-                <CarpoolDashboard
+                <CarpoolBookingList
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   onSelectRide={(ride) => navigate(`/carpooling/rides/${ride.id}`)}
