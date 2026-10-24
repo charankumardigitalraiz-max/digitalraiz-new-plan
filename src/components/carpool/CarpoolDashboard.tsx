@@ -20,7 +20,7 @@ import { RideTable } from './RideTable';
 import { carpoolService } from '../../services';
 
 interface CarpoolDashboardProps {
-  rides: CarpoolRide[];
+  rides?: CarpoolRide[];
   cardCount?: CarpoolCardCount | null;
   pagination?: CarpoolPagination | null;
   searchQuery?: string;
@@ -31,7 +31,7 @@ interface CarpoolDashboardProps {
 }
 
 export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
-  rides: initialRides,
+  rides: initialRides = [],
   cardCount: initialCardCount,
   pagination: initialPagination,
   searchQuery = '',
@@ -124,14 +124,6 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
   }, [debouncedSearch, statusFilter, page, limit]);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      // If we don't have initial data yet, load from server
-      if (initialRides.length === 0) {
-        executeQuery();
-      }
-      return;
-    }
     executeQuery();
   }, [debouncedSearch, statusFilter, page, limit, executeQuery]);
 

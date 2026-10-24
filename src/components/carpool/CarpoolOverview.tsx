@@ -1,89 +1,173 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Car,
   Users,
   TrendingUp,
   ShieldCheck,
-  MapPin,
   ArrowRight,
   Clock,
-  Plus,
   Compass,
   Star,
-  CheckCircle2,
   AlertCircle,
-  Calendar,
-  Sparkles,
   ChevronRight,
-  Eye,
-  SlidersHorizontal,
   Route as RouteIcon
 } from 'lucide-react';
-import type { CarpoolRide, Driver, CarpoolCardCount } from '../../types';
+import type {
+  CarpoolRide,
+  Driver,
+  CarpoolCardCount,
+  CarpoolDashboardOverviewData,
+  RouteCorridorItem
+} from '../../types';
 import { MetricCard } from '../common/MetricCard';
 import { CarpoolAnalyticsCharts } from './CarpoolAnalyticsCharts';
+import { carpoolService, driverService } from '../../services';
 
 interface CarpoolOverviewProps {
-  rides: CarpoolRide[];
-  drivers: Driver[];
+  rides?: CarpoolRide[];
+  drivers?: Driver[];
   cardCount?: CarpoolCardCount | null;
   onNavigateSubTab: (subTab: 'rides' | 'verifications' | 'settings') => void;
   onSelectRide: (ride: CarpoolRide) => void;
   onOpenCreateModal: () => void;
 }
 
-type Timeframe = '7D' | '30D' | '90D' | 'ALL';
+type Timeframe = '7D' | '30D' | '90D' | '12M';
 
 export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
-  rides,
-  drivers,
-  cardCount,
+  rides: propRides,
+  drivers: propDrivers,
+  cardCount: propCardCount,
   onNavigateSubTab,
   onSelectRide,
   onOpenCreateModal
 }) => {
+  const [internalRides, setInternalRides] = useState<CarpoolRide[]>(propRides || []);
+  const [internalDrivers, setInternalDrivers] = useState<Driver[]>(propDrivers || []);
+  const [internalCardCount, setInternalCardCount] = useState<CarpoolCardCount | null>(propCardCount || null);
+
+  // ALL-IN-ONE API State (public/carpooling-dashboard.txt)
+  const [dashboardOverview, setDashboardOverview] = useState<CarpoolDashboardOverviewData | null>(null);
+  const [overviewRecentRides, setOverviewRecentRides] = useState<CarpoolRide[]>([]);
   const [timeframe, setTimeframe] = useState<Timeframe>('30D');
-  const [selectedCorridor, setSelectedCorridor] = useState<string | null>(null);
+  const [isOverviewLoading, setIsOverviewLoading] = useState<boolean>(true);
 
-  // Derived metrics
-  const activeRides = useMemo(() => rides.filter(r => r.status === 'active'), [rides]);
-  const completedRides = useMemo(() => rides.filter(r => r.status === 'completed'), [rides]);
+  // Fetch unified Carpool Dashboard Overview API on mount and when timeframe changes
+  useEffect(() => {
+    setIsOverviewLoading(true);
+    carpoolService
+      .getDashboardOverview({ timeframe, corridorLimit: 5 })
+      .then((res) => {
+        if (res) {
+          setDashboardOverview(res);
+          if (res.recentRides && Array.isArray(res.recentRides) && res.recentRides.length > 0) {
+            const mapped = res.recentRides.map((r) => carpoolService.mapBackendRideToCarpoolRide(r));
+            setOverviewRecentRides(mapped);
+          }
+        }
+      })
+      .catch((err) => console.warn('Carpool dashboard overview fetch error:', err))
+      .finally(() => setIsOverviewLoading(false));
+  }, [timeframe]);
 
+  // Fallback initial load for rides and drivers
+  useEffect(() => {
+    if (!propRides) {
+      carpoolService
+        .getRidesWithMeta({ page: 1, limit: 50 })
+        .then((res) => {
+          if (res?.rides && Array.isArray(res.rides)) {
+            setInternalRides(res.rides);
+          }
+          if (res?.cardCount) {
+            setInternalCardCount(res.cardCount);
+          }
+        })
+        .catch((err) => console.warn('CarpoolOverview rides fetch:', err));
+    }
+  }, [propRides]);
+
+  useEffect(() => {
+    if (!propDrivers) {
+      driverService
+        .getDrivers({ status: 'all', page: 1, limit: 50 })
+        .then((res) => {
+          if (res?.drivers && Array.isArray(res.drivers)) {
+            setInternalDrivers(res.drivers);
+          }
+        })
+        .catch((err) => console.warn('CarpoolOverview drivers fetch:', err));
+    }
+  }, [propDrivers]);
+
+  const rides = propRides || internalRides;
+  const drivers = propDrivers || internalDrivers;
+  const cardCount = propCardCount || internalCardCount;
+
+  // Local fallback calculations from rides list
+  const activeRides = useMemo(() => rides.filter((r) => r.status === 'active'), [rides]);
   const totalSeats = useMemo(() => rides.reduce((sum, r) => sum + r.totalSeats, 0), [rides]);
   const availableSeats = useMemo(() => activeRides.reduce((sum, r) => sum + r.availableSeats, 0), [activeRides]);
-  const bookedSeats = useMemo(() => {
-    return rides.reduce((sum, r) => sum + (r.totalSeats - r.availableSeats), 0);
-  }, [rides]);
+  const bookedSeats = useMemo(() => rides.reduce((sum, r) => sum + (r.totalSeats - r.availableSeats), 0), [rides]);
+  const fallbackOccupancy = totalSeats > 0 ? Math.round((bookedSeats / totalSeats) * 100) : 0;
+  const fallbackGMV = useMemo(() => rides.reduce((sum, r) => sum + ((r.totalSeats - r.availableSeats) * r.pricePerSeat), 0), [rides]);
+  const fallbackAvgFare = useMemo(() => (rides.length > 0 ? Math.round(rides.reduce((sum, r) => sum + r.pricePerSeat, 0) / rides.length) : 0), [rides]);
 
-  const occupancyRate = totalSeats > 0 ? Math.round((bookedSeats / totalSeats) * 100) : 0;
+  const verifiedDrivers = useMemo(() => drivers.filter((d) => d.verificationStatus === 'verified'), [drivers]);
+  const pendingDrivers = useMemo(() => drivers.filter((d) => d.verificationStatus === 'pending'), [drivers]);
 
-  const totalGMV = useMemo(() => {
-    return rides.reduce((sum, r) => sum + ((r.totalSeats - r.availableSeats) * r.pricePerSeat), 0);
-  }, [rides]);
+  // Unified metrics from the ALL-IN-ONE API (with graceful fallback to calculated values)
+  const m = dashboardOverview?.metrics;
+  const activeCount = m?.rides?.active ?? (cardCount?.activeRides ?? activeRides.length);
+  const occupancyPercent = m?.seats?.occupancyRate ?? fallbackOccupancy;
+  const currencySymbol = m?.financials?.currency || '₹';
+  const displayGMV = m?.financials?.totalGMV !== undefined
+    ? `${currencySymbol}${m.financials.totalGMV.toLocaleString()}`
+    : `₹${fallbackGMV.toLocaleString()}`;
 
-  const avgFare = useMemo(() => {
-    return rides.length > 0
-      ? Math.round(rides.reduce((sum, r) => sum + r.pricePerSeat, 0) / rides.length)
-      : 0;
-  }, [rides]);
+  const verifiedCount = m?.drivers?.verified ?? verifiedDrivers.length;
+  const pendingCount = m?.drivers?.pending ?? pendingDrivers.length;
+  const totalFleetCount = m?.drivers?.total ?? drivers.length;
 
-  const verifiedDrivers = useMemo(() => drivers.filter(d => d.verificationStatus === 'verified'), [drivers]);
-  const pendingDrivers = useMemo(() => drivers.filter(d => d.verificationStatus === 'pending'), [drivers]);
+  const totalCatalogRides = m?.rides?.total ?? rides.length;
+  const openSeatsCount = m?.seats?.availableSeats ?? availableSeats;
+  const totalOfferedSeats = m?.seats?.totalSeatsOffered ?? totalSeats;
+  const bookedSeatsCount = m?.seats?.totalSeatsBooked ?? bookedSeats;
+  const averageFare = m?.financials?.avgFare ?? fallbackAvgFare;
 
-  // Aggregate Corridor Performance
-  const corridorStats = useMemo(() => {
+  // Top Corridors: from dashboardOverview.topCorridors or calculated fallback
+  const displayCorridors = useMemo(() => {
+    if (dashboardOverview?.topCorridors && dashboardOverview.topCorridors.length > 0) {
+      return dashboardOverview.topCorridors.map((c: RouteCorridorItem) => {
+        const route = c.corridor || c.route || `${c.originCity || c.origin} ↔ ${c.destinationCity || c.destination}`;
+        const total = c.totalSeats || 1;
+        const booked = c.bookedSeats || 0;
+        const fill = total > 0 ? Math.round((booked / total) * 100) : 0;
+        const dist = c.distanceKm ? `${c.distanceKm} km` : (c.estimatedDistanceKm ? `${c.estimatedDistanceKm} km` : '142.5 km');
+        return {
+          route,
+          distance: dist,
+          avgPrice: c.avgPrice || 250,
+          rideCount: c.rideCount || 1,
+          totalSeats: total,
+          bookedSeats: booked,
+          fillPercent: fill
+        };
+      });
+    }
+
+    // Fallback: aggregate from rides list
     const map = new Map<string, {
       route: string;
-      origin: string;
-      destination: string;
+      distance: string;
+      avgPrice: number;
       rideCount: number;
       totalSeats: number;
       bookedSeats: number;
-      avgPrice: number;
-      distance: string;
+      fillPercent: number;
     }>();
 
-    rides.forEach(ride => {
+    rides.forEach((ride) => {
       const key = `${ride.originCity} ↔ ${ride.destinationCity}`;
       const existing = map.get(key);
       const booked = ride.totalSeats - ride.availableSeats;
@@ -92,22 +176,31 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
         existing.totalSeats += ride.totalSeats;
         existing.bookedSeats += booked;
         existing.avgPrice = Math.round((existing.avgPrice + ride.pricePerSeat) / 2);
+        existing.fillPercent = existing.totalSeats > 0 ? Math.round((existing.bookedSeats / existing.totalSeats) * 100) : 0;
       } else {
+        const totalS = ride.totalSeats || 1;
         map.set(key, {
           route: key,
-          origin: ride.originCity,
-          destination: ride.destinationCity,
-          rideCount: 1,
-          totalSeats: ride.totalSeats,
-          bookedSeats: booked,
+          distance: ride.distance || '180 km',
           avgPrice: ride.pricePerSeat,
-          distance: ride.distance || '180 km'
+          rideCount: 1,
+          totalSeats: totalS,
+          bookedSeats: booked,
+          fillPercent: Math.round((booked / totalS) * 100)
         });
       }
     });
 
-    return Array.from(map.values()).sort((a, b) => b.rideCount - a.rideCount);
-  }, [rides]);
+    return Array.from(map.values()).sort((a, b) => b.rideCount - a.rideCount).slice(0, 5);
+  }, [dashboardOverview?.topCorridors, rides]);
+
+  // Recent rides to display
+  const displayRecentRides = useMemo(() => {
+    if (overviewRecentRides.length > 0) {
+      return overviewRecentRides.slice(0, 5);
+    }
+    return rides.slice(0, 5);
+  }, [overviewRecentRides, rides]);
 
   // Top rated drivers
   const topDrivers = useMemo(() => {
@@ -116,14 +209,9 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
       .slice(0, 4);
   }, [verifiedDrivers]);
 
-  // Recent rides
-  const recentRides = useMemo(() => {
-    return rides.slice(0, 5);
-  }, [rides]);
-
   return (
     <div className="space-y-4">
-      {/* Top Banner Card & Quick Controls */}
+      {/* Top Banner Card & Timeframe Selector */}
       <div className="rounded-lg border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-[22px] font-semibold tracking-tight text-slate-900">
@@ -134,15 +222,15 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
           </p>
         </div>
 
-        {/* Action Buttons & Timeframe Selector */}
+        {/* Unified Timeframe Selector (7D, 30D, 90D, 12M) */}
         <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
           <div className="flex items-center p-1 bg-slate-100/80 rounded-xl border border-slate-200/70 text-xs font-medium text-slate-600">
-            {(['7D', '30D', '90D', 'ALL'] as Timeframe[]).map((t) => (
+            {(['7D', '30D', '90D', '12M'] as Timeframe[]).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setTimeframe(t)}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${timeframe === t
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${timeframe === t
                   ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'hover:text-slate-900'
                   }`}
@@ -158,31 +246,31 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Active Carpools"
-          value={cardCount?.activeRides ?? activeRides.length}
+          value={activeCount}
           isPositive={true}
           icon={Car}
           accentColor="emerald"
         />
         <MetricCard
           label="Seat Occupancy Rate"
-          value={`${occupancyRate}%`}
-          isPositive={occupancyRate >= 70}
+          value={`${occupancyPercent}%`}
+          isPositive={occupancyPercent >= 70}
           icon={Users}
           accentColor="cyan"
         />
         <MetricCard
           label="Gross Booking Value"
-          value={`₹${totalGMV.toLocaleString()}`}
+          value={displayGMV}
           isPositive={true}
           icon={TrendingUp}
           accentColor="indigo"
         />
         <MetricCard
           label="Verified Drivers"
-          value={`${verifiedDrivers.length}`}
-          isPositive={pendingDrivers.length === 0}
+          value={`${verifiedCount}`}
+          isPositive={pendingCount === 0}
           icon={ShieldCheck}
-          accentColor={pendingDrivers.length > 0 ? 'amber' : 'purple'}
+          accentColor={pendingCount > 0 ? 'amber' : 'purple'}
         />
       </div>
 
@@ -190,6 +278,11 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
       <CarpoolAnalyticsCharts
         rides={rides}
         drivers={drivers}
+        analyticsData={dashboardOverview?.analytics}
+        corridors={dashboardOverview?.topCorridors}
+        timeframe={timeframe}
+        onTimeframeChange={setTimeframe}
+        isLoading={isOverviewLoading}
       />
 
       {/* Secondary Quick Pulse Bar */}
@@ -200,7 +293,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
           </div>
           <div>
             <div className="text-[11px] font-medium text-slate-400">Total Rides Catalog</div>
-            <div className="text-base font-semibold text-slate-800">{rides.length} Routes</div>
+            <div className="text-base font-semibold text-slate-800">{totalCatalogRides} Routes</div>
           </div>
         </div>
 
@@ -210,7 +303,9 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
           </div>
           <div>
             <div className="text-[11px] font-medium text-slate-400">Seats In Circulation</div>
-            <div className="text-base font-semibold text-slate-800">{availableSeats} Open / {totalSeats} Total</div>
+            <div className="text-base font-semibold text-slate-800">
+              {openSeatsCount} Open / {totalOfferedSeats} Total
+            </div>
           </div>
         </div>
 
@@ -221,8 +316,8 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
           <div>
             <div className="text-[11px] font-medium text-slate-400">KYC Review Queue</div>
             <div className="text-base font-semibold text-slate-800 flex items-center gap-1.5">
-              <span>{pendingDrivers.length} Pending</span>
-              {pendingDrivers.length > 0 && (
+              <span>{pendingCount} Pending</span>
+              {pendingCount > 0 && (
                 <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
               )}
             </div>
@@ -235,15 +330,15 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
           </div>
           <div>
             <div className="text-[11px] font-medium text-slate-400">Average Seat Fare</div>
-            <div className="text-base font-semibold text-slate-800">₹{avgFare}</div>
+            <div className="text-base font-semibold text-slate-800">{currencySymbol}{averageFare}</div>
           </div>
         </div>
       </div> */}
 
       {/* Main Analytics Grid: High Traffic Corridors & Occupancy Dynamics */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Mobility Corridors Performance (7 Cols) */}
-        {/* <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+     
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
@@ -265,69 +360,61 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
               </button>
             </div>
 
-           
             <div className="space-y-3">
-              {corridorStats.slice(0, 5).map((corridor, idx) => {
-                const fillPercent = corridor.totalSeats > 0
-                  ? Math.round((corridor.bookedSeats / corridor.totalSeats) * 100)
-                  : 0;
-
-                return (
-                  <div
-                    key={corridor.route}
-                    className="group rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200 p-3.5 transition-all shadow-2xs"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-200 text-slate-700 text-[10px] font-bold">
-                          #{idx + 1}
-                        </span>
-                        <span className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors">
-                          {corridor.route}
-                        </span>
-                        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
-                          {corridor.distance}
-                        </span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-slate-900">₹{corridor.avgPrice}</span>
-                        <span className="text-[10px] text-slate-400 block">per seat</span>
-                      </div>
+              {displayCorridors.map((corridor, idx) => (
+                <div
+                  key={corridor.route}
+                  className="group rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200 p-3.5 transition-all shadow-2xs"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-200 text-slate-700 text-[10px] font-bold">
+                        #{idx + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors">
+                        {corridor.route}
+                      </span>
+                      <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                        {corridor.distance}
+                      </span>
                     </div>
-
-           
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500">
-                          {corridor.rideCount} {corridor.rideCount === 1 ? 'ride' : 'rides'} scheduled
-                        </span>
-                        <span className="font-medium text-emerald-700">
-                          {fillPercent}% booked ({corridor.bookedSeats}/{corridor.totalSeats} seats)
-                        </span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-slate-200/70 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                          style={{ width: `${Math.min(fillPercent, 100)}%` }}
-                        />
-                      </div>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-slate-900">{currencySymbol}{corridor.avgPrice}</span>
+                      <span className="text-[10px] text-slate-400 block">per seat</span>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500">
+                        {corridor.rideCount} {corridor.rideCount === 1 ? 'ride' : 'rides'} scheduled
+                      </span>
+                      <span className="font-medium text-emerald-700">
+                        {corridor.fillPercent}% booked ({corridor.bookedSeats}/{corridor.totalSeats} seats)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-slate-200/70 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                        style={{ width: `${Math.min(corridor.fillPercent, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Aggregating active intercity routes</span>
-            <span className="font-medium text-slate-600">{corridorStats.length} Total Corridors Identified</span>
+            <span>Aggregating active intercity corridors</span>
+            <span className="font-medium text-slate-600">{displayCorridors.length} Corridors Active</span>
           </div>
-        </div> */}
+        </div>
 
-        {/* Right Column: Fleet Health & Seat Distribution (5 Cols) */}
+
         <div className="lg:col-span-5 space-y-6">
-          {/* Seat Distribution Breakdown */}
-          {/* <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
+
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50 text-sky-600 border border-sky-100">
@@ -336,10 +423,9 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                 <h2 className="text-sm font-semibold text-slate-900">Seat Inventory Status</h2>
               </div>
               <span className="rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 text-[10px] font-medium">
-                {occupancyRate}% Utilization
+                {occupancyPercent}% Utilization
               </span>
             </div>
-
 
             <div className="space-y-3.5">
               <div>
@@ -348,12 +434,12 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     Booked Seats
                   </span>
-                  <span className="font-semibold text-slate-900">{bookedSeats} ({occupancyRate}%)</span>
+                  <span className="font-semibold text-slate-900">{bookedSeatsCount} ({occupancyPercent}%)</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-emerald-500 transition-all"
-                    style={{ width: `${occupancyRate}%` }}
+                    style={{ width: `${occupancyPercent}%` }}
                   />
                 </div>
               </div>
@@ -364,12 +450,12 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                     <span className="h-2 w-2 rounded-full bg-sky-500" />
                     Available Seats
                   </span>
-                  <span className="font-semibold text-slate-900">{availableSeats} ({100 - occupancyRate}%)</span>
+                  <span className="font-semibold text-slate-900">{openSeatsCount} ({Math.max(0, 100 - occupancyPercent)}%)</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-sky-500 transition-all"
-                    style={{ width: `${100 - occupancyRate}%` }}
+                    style={{ width: `${Math.max(0, 100 - occupancyPercent)}%` }}
                   />
                 </div>
               </div>
@@ -380,12 +466,12 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                     <span className="h-2 w-2 rounded-full bg-indigo-500" />
                     Active Scheduled Rides
                   </span>
-                  <span className="font-semibold text-slate-900">{activeRides.length} Carpools</span>
+                  <span className="font-semibold text-slate-900">{activeCount} Carpools</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-indigo-500 transition-all"
-                    style={{ width: `${Math.round((activeRides.length / (rides.length || 1)) * 100)}%` }}
+                    style={{ width: `${Math.min(100, Math.round((activeCount / (totalCatalogRides || 1)) * 100))}%` }}
                   />
                 </div>
               </div>
@@ -396,15 +482,15 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
               <button
                 type="button"
                 onClick={onOpenCreateModal}
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+                className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors cursor-pointer"
               >
                 + Add Ride
               </button>
             </div>
-          </div> */}
+          </div>
 
-          {/* Driver Compliance & Verification Status */}
-          {/* <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
+      
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-2xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-50 text-purple-600 border border-purple-100">
@@ -424,25 +510,25 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
 
             <div className="grid grid-cols-3 gap-2 text-center my-3">
               <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-100">
-                <div className="text-base font-bold text-emerald-700">{verifiedDrivers.length}</div>
+                <div className="text-base font-bold text-emerald-700">{verifiedCount}</div>
                 <div className="text-[10px] font-medium text-emerald-600">Verified</div>
               </div>
               <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-100">
-                <div className="text-base font-bold text-amber-700">{pendingDrivers.length}</div>
+                <div className="text-base font-bold text-amber-700">{pendingCount}</div>
                 <div className="text-[10px] font-medium text-amber-600">Pending Review</div>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-base font-bold text-slate-700">{drivers.length}</div>
+                <div className="text-base font-bold text-slate-700">{totalFleetCount}</div>
                 <div className="text-[10px] font-medium text-slate-500">Total Fleet</div>
               </div>
             </div>
 
-            {pendingDrivers.length > 0 && (
+            {pendingCount > 0 && (
               <div className="rounded-xl bg-amber-50/90 border border-amber-200/80 p-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
                   <span className="text-xs font-normal text-amber-900">
-                    {pendingDrivers.length} driver licenses need KYC approval
+                    {pendingCount} driver licenses need KYC approval
                   </span>
                 </div>
                 <button
@@ -454,9 +540,9 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                 </button>
               </div>
             )}
-          </div> */}
+          </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Bottom Section: Recent Carpool Rides & Top Drivers */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -477,13 +563,13 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
               onClick={() => onNavigateSubTab('rides')}
               className="text-[11px] font-medium text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
             >
-              <span>Explore All {rides.length} Rides</span>
+              <span>Explore All {totalCatalogRides} Rides</span>
               <ArrowRight className="h-3 w-3" />
             </button>
           </div>
 
           <div className="divide-y divide-slate-100">
-            {recentRides.map(ride => (
+            {displayRecentRides.map((ride) => (
               <div
                 key={ride.id}
                 onClick={() => onSelectRide(ride)}
@@ -519,7 +605,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
 
                 <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                   <div className="text-right">
-                    <div className="text-xs font-bold text-slate-900">₹{ride.pricePerSeat}</div>
+                    <div className="text-xs font-bold text-slate-900">{currencySymbol}{ride.pricePerSeat}</div>
                     <div className="text-[11px] text-emerald-600 font-medium">
                       {ride.availableSeats} of {ride.totalSeats} seats open
                     </div>
@@ -547,7 +633,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
             </div>
 
             <div className="space-y-3">
-              {topDrivers.map(driver => (
+              {topDrivers.map((driver) => (
                 <div
                   key={driver.id}
                   className="rounded-xl border border-slate-100 bg-slate-50/50 p-3 flex items-center gap-3"
@@ -582,7 +668,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
             className="mt-4 w-full py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
-            <span>Manage All {drivers.length} Drivers & KYC</span>
+            <span>Manage All {totalFleetCount} Drivers & KYC</span>
           </button>
         </div>
       </div>

@@ -1,0 +1,146 @@
+================================================================================
+WAYFER API CURL COMMANDS - ADMIN CARPOOL DRIVER KYC & VERIFICATION
+Base URL: http://localhost:5000/api/admin/carpool
+================================================================================
+
+All admin carpool endpoints require an active Bearer Token of a user with role 'admin'.
+
+Note: verificationStatus will be 'verified' ONLY when both isKYC is true and isEmailVerified is true. Otherwise, it remains 'pending'.
+
+================================================================================
+1. GET ALL DRIVERS (With KYC status, filters, and vehicle profiles)
+--------------------------------------------------------------------------------
+curl -X GET "http://localhost:5000/api/admin/carpool/drivers?status=all&page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/drivers?status=all&page=1&limit=20" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+    "status": "success",
+    "data": {
+        "pagination": {
+            "total": 1,
+            "page": 1,
+            "limit": 20,
+            "totalPages": 1
+        },
+        "total": 1,
+        "page": 1,
+        "limit": 20,
+        "totalPages": 1,
+        "counts": {
+            "verified": 0,
+            "pending": 0
+        },
+        "drivers": [
+            {
+                "id": "6adb67a4aa3c7b6dd3728929",
+                "name": "User 8557",
+                "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=160",
+                "rating": 4.9,
+                "totalRides": 1,
+                "phone": "9908068557",
+                "email": "N/A",
+                "KYCStatus": "pending",
+                "idDocument": "Document Pending Upload",
+                "govtIdNumber": null,
+                "govtIdProof": null,
+                "drivingLicenseNumber": "DL-PENDING",
+                "vehicleModel": "Honda City (KA-01-MJ-1234)",
+                "vehiclePlate": "Not provided",
+                "vehicleColor": "Standard",
+                "joinedDate": "Oct 2026"
+            }
+        ]
+    }
+}
+
+================================================================================
+2. GET DRIVER DETAILS & KYC DOCUMENTS BY ID
+--------------------------------------------------------------------------------
+curl -X GET http://localhost:5000/api/admin/carpool/drivers/1 \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/drivers/1" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "driver": {
+      "id": "1",
+      "name": "Rajender Reddy",
+      "phone": "+919876543210",
+      "email": "rajender@example.com",
+      "isKYC": true,
+      "isEmailVerified": true,
+      "govtIdNumber": "AADHAAR-8932-1245-7890",
+      "govtIdProof": "/uploads/kyc/driver_1_aadhaar.pdf",
+      "vehicleModel": "Honda City 2022",
+      "vehiclePlate": "TS-09-AB-1234"
+    },
+    "publishedRides": []
+  }
+}
+
+================================================================================
+3. VERIFY OR REJECT DRIVER KYC
+--------------------------------------------------------------------------------
+curl -X PATCH http://localhost:5000/api/admin/carpool/drivers/1/verification \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "status": "verified"
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/drivers/1/verification" -Method Patch -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"status":"verified"}'
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Driver verification status set to 'verified' successfully.",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Rajender Reddy",
+      "isKYC": true
+    }
+  }
+}
+
+================================================================================
+4. UPDATE GOVT ID & KYC DOCUMENTS FOR DRIVER
+--------------------------------------------------------------------------------
+curl -X PATCH http://localhost:5000/api/admin/carpool/drivers/1/kyc-docs \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "govtIdNumber": "AADHAAR-8932-1245-7890",
+    "govtIdProof": "/uploads/kyc/driver_1_aadhaar.pdf",
+    "isEmailVerified": true,
+    "isKYC": true
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/drivers/1/kyc-docs" -Method Patch -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"govtIdNumber":"AADHAAR-8932-1245-7890","govtIdProof":"/uploads/kyc/driver_1_aadhaar.pdf","isEmailVerified":true,"isKYC":true}'
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Driver KYC credentials updated successfully.",
+  "data": {
+    "user": {
+      "id": 1,
+      "name": "Rajender Reddy",
+      "isKYC": true,
+      "isEmailVerified": true,
+      "govtIdNumber": "AADHAAR-8932-1245-7890",
+      "govtIdProof": "/uploads/kyc/driver_1_aadhaar.pdf"
+    }
+  }
+}
+================================================================================

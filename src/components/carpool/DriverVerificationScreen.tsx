@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
   Clock,
@@ -7,27 +8,65 @@ import {
   Search,
   X,
   Filter,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from 'lucide-react';
 import type { Driver } from '../../types';
 import { MetricCard } from '../common/MetricCard';
 import { DriverVerificationList } from './DriverVerificationList';
+import { driverService } from '../../services';
 
 interface DriverVerificationScreenProps {
-  drivers: Driver[];
+  drivers?: Driver[];
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
-  onVerifyDriver: (driverId: string, status: 'verified' | 'rejected' | 'pending') => void;
+  onVerifyDriver?: (driverId: string, status: 'verified' | 'rejected' | 'pending') => void;
   onViewDriverDetails?: (driver: Driver) => void;
 }
 
 export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> = ({
-  drivers,
+  drivers: externalDrivers,
   searchQuery = '',
   onSearchChange,
   onVerifyDriver,
   onViewDriverDetails
 }) => {
+  const navigate = useNavigate();
+  const [driverList, setDriverList] = useState<Driver[]>(externalDrivers || []);
+  const [isLoading, setIsLoading] = useState<boolean>(!externalDrivers || externalDrivers.length === 0);
+
+  // Self-fetch driver verification data directly from driverService
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    driverService
+      .getDrivers({ status: 'all', page: 1, limit: 50 })
+      .then((res) => {
+        if (!isMounted) return;
+        if (Array.isArray(res.drivers)) {
+          setDriverList(res.drivers);
+        }
+      })
+      .catch((err) => {
+        console.warn('Driver fetch notice:', err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Sync external drivers if provided
+  useEffect(() => {
+    if (externalDrivers && externalDrivers.length > 0) {
+      setDriverList(externalDrivers);
+    }
+  }, [externalDrivers]);
+
   const [internalSearch, setInternalSearch] = useState('');
   const searchTerm = onSearchChange ? searchQuery : (searchQuery || internalSearch);
 
@@ -38,16 +77,47 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'pending' | 'rejected'>('all');
 
-  // Metrics
-  const verifiedCount = drivers.filter(d => d.verificationStatus === 'verified').length;
-  const pendingCount = drivers.filter(d => d.verificationStatus === 'pending').length;
-  const rejectedCount = drivers.filter(d => d.verificationStatus === 'rejected').length;
-  const avgRating = drivers.length > 0
-    ? (drivers.reduce((acc, d) => acc + d.rating, 0) / drivers.length).toFixed(1)
+  // Handle direct verification API call
+  const handleVerify = async (driverId: string, status: 'verified' | 'rejected' | 'pending') => {
+    try {
+      await driverService.verifyDriver(driverId, status);
+      setDriverList((prev) =>
+        prev.map((d) =>
+          d.id === driverId
+            ? {
+              ...d,
+              verificationStatus: status,
+              isKYC: status === 'verified'
+            }
+            : d
+        )
+      );
+      onVerifyDriver?.(driverId, status);
+    } catch {
+      setDriverList((prev) =>
+        prev.map((d) => (d.id === driverId ? { ...d, verificationStatus: status } : d))
+      );
+    }
+  };
+
+  const handleViewDetails = (driver: Driver) => {
+    if (onViewDriverDetails) {
+      onViewDriverDetails(driver);
+      return;
+    }
+    navigate(`/users/${driver.id}?tab=kyc`);
+  };
+
+  // Metrics calculated from driverList
+  const verifiedCount = driverList.filter(d => d.KYCStatus === 'verified').length;
+  const pendingCount = driverList.filter(d => d.KYCStatus === 'pending').length;
+  const rejectedCount = driverList.filter(d => d.KYCStatus === 'rejected').length;
+  const avgRating = driverList.length > 0
+    ? (driverList.reduce((acc, d) => acc + d.rating, 0) / driverList.length).toFixed(1)
     : '5.0';
 
   // Filtered drivers
-  const filteredDrivers = drivers.filter(driver => {
+  const filteredDrivers = driverList.filter(driver => {
     const q = searchTerm.toLowerCase().trim();
     const matchesSearch =
       !q ||
@@ -68,35 +138,21 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
 
   return (
     <div className="space-y-4">
-      {/* Top Banner Card & Quick Controls */}
+      {/* Top Banner Card */}
       <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-[22px] font-semibold tracking-tight text-slate-900">
               Driver KYC & License Auditing
             </h1>
-            {/* <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
-              {pendingCount} Pending Review
-            </span> */}
+            {isLoading && (
+              <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+            )}
           </div>
           <p className="text-[13px] font-normal text-slate-500 mt-0.5 max-w-2xl">
             Review driver identities, national IDs, licenses and vehicle safety compliance.
           </p>
         </div>
-
-        {/* <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
-            className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-xs ${statusFilter === 'pending'
-              ? 'bg-amber-600 hover:bg-amber-500 text-white'
-              : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-              }`}
-          >
-            <Clock className="h-3.5 w-3.5" />
-            <span>{statusFilter === 'pending' ? 'Showing Pending Queue' : `Audit ${pendingCount} Pending Drivers`}</span>
-          </button>
-        </div> */}
       </div>
 
       {/* Metric Highlights */}
@@ -117,7 +173,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
         />
         <MetricCard
           label="Total Registered"
-          value={drivers.length}
+          value={driverList.length}
           isPositive={true}
           icon={Users}
           accentColor="indigo"
@@ -173,10 +229,6 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
             </div>
-
-            {/* <span className="text-xs text-slate-400 ml-1">
-              Showing {filteredDrivers.length} of {drivers.length} drivers
-            </span> */}
           </div>
         </div>
 
@@ -184,8 +236,8 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
         <div className="p-4">
           <DriverVerificationList
             drivers={filteredDrivers}
-            onVerify={onVerifyDriver}
-            onViewDetails={onViewDriverDetails}
+            onVerify={handleVerify}
+            onViewDetails={handleViewDetails}
           />
         </div>
       </div>

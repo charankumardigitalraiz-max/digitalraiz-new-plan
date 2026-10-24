@@ -12,9 +12,14 @@ import type {
   CarpoolBookingsResponse,
   CarpoolBookingDetailResponse,
   GetCarpoolRidesParams,
-  GetCarpoolBookingsParams
+  GetCarpoolBookingsParams,
+  CarpoolDashboardOverviewData,
+  CarpoolDashboardOverviewResponse,
+  GetDashboardOverviewParams
 } from '../types';
-import { mockCarpoolRides, mockDrivers } from '../data/mockData';
+import { driverService } from './driverService';
+import { pricingService } from './pricingService';
+import { mockCarpoolRides } from '../data/mockData';
 
 export interface GetRidesWithMetaResult {
   rides: CarpoolRide[];
@@ -212,28 +217,44 @@ class CarpoolService {
   }
 
   // ===========================================================================
-  // DRIVER KYC VERIFICATIONS
+  // C. CARPOOL DASHBOARD (ALL-IN-ONE API) (public/carpooling-dashboard.txt)
   // ===========================================================================
 
-  async getDrivers(): Promise<Driver[]> {
+  /**
+   * GET CARPOOL DASHBOARD OVERVIEW (ALL-IN-ONE)
+   * GET /api/admin/carpool/dashboard/overview?timeframe=30D&corridorLimit=5
+   * Consolidates metrics, driver stats, expressway corridor shares, analytics trends,
+   * and recent ride & booking activities into a single unified response.
+   */
+  async getDashboardOverview(
+    params?: GetDashboardOverviewParams
+  ): Promise<CarpoolDashboardOverviewData | null> {
     try {
-      const res = await apiClient.get<Driver[]>('/api/admin/drivers');
-      return Array.isArray(res) ? res : mockDrivers;
-    } catch {
-      return mockDrivers;
+      const queryParams: Record<string, string | number> = {};
+      if (params?.timeframe) {
+        queryParams.timeframe = params.timeframe;
+      }
+      if (params?.corridorLimit !== undefined) {
+        queryParams.corridorLimit = params.corridorLimit;
+      }
+
+      const response = await apiClient.get<CarpoolDashboardOverviewResponse>(
+        '/api/admin/carpool/dashboard/overview',
+        { params: queryParams }
+      );
+      return response?.data || null;
+    } catch (err) {
+      console.warn('Dashboard overview fetch fallback:', err);
+      return null;
     }
   }
 
-  async verifyDriver(
-    driverId: string,
-    status: 'verified' | 'rejected' | 'pending'
-  ): Promise<{ success: boolean }> {
-    try {
-      return await apiClient.patch(`/api/admin/drivers/${driverId}/verification`, { status });
-    } catch {
-      return { success: true };
-    }
-  }
+  // ===========================================================================
+  // CARPOOL PRICING CONFIGURATION DELEGATES (Use pricingService directly)
+  // ===========================================================================
+
+  getPricingConfig = pricingService.getPricingConfig.bind(pricingService);
+  updatePricingConfig = pricingService.updatePricingConfig.bind(pricingService);
 
   // ===========================================================================
   // DATA ADAPTER: BackendRide -> UI CarpoolRide
@@ -261,14 +282,30 @@ class CarpoolService {
     const originCity = extractCity(originAddress);
     const destinationCity = extractCity(destAddress);
 
-    const departureDate = b.departureTime ? b.departureTime.split('T')[0] : '2026-10-25';
+    // Convert UTC departureTime to Indian Standard Time (IST / Asia/Kolkata)
+    let departureDate = '2026-10-25';
     let departureTimeStr = '08:30 AM';
     try {
       if (b.departureTime) {
-        departureTimeStr = new Date(b.departureTime).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
+        const d = new Date(b.departureTime);
+        if (!isNaN(d.getTime())) {
+          departureDate = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          }).format(d);
+
+          departureTimeStr = new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }).format(d);
+        } else {
+          departureDate = b.departureTime.split('T')[0] || '2026-10-25';
+          departureTimeStr = b.departureTime;
+        }
       }
     } catch {
       departureTimeStr = '08:30 AM';
@@ -347,6 +384,15 @@ class CarpoolService {
       passengers
     };
   }
+
+  // ===========================================================================
+  // D. DRIVER VERIFICATION DELEGATES (Use driverService directly)
+  // ===========================================================================
+
+  // getDrivers = driverService.getDrivers.bind(driverService);
+  getDriverById = driverService.getDriverById.bind(driverService);
+  // verifyDriver = driverService.verifyDriver.bind(driverService);
+  updateDriverKycDocs = driverService.updateDriverKycDocs.bind(driverService);
 }
 
 export const carpoolService = new CarpoolService();

@@ -222,6 +222,11 @@ class AuthService {
   }
 
   clearAllAuth(): void {
+    try {
+      localStorage.clear();
+    } catch (e) {
+      console.warn('Unable to clear localStorage:', e);
+    }
     apiClient.clearAllTokens();
     this.clearCurrentUser();
   }
@@ -252,7 +257,7 @@ class AuthService {
   }
 
   logout(): void {
-    this.logoutAdmin().catch(() => {});
+    this.logoutAdmin().catch(() => { });
   }
 
   isAuthenticated(): boolean {

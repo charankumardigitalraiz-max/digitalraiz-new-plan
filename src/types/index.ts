@@ -14,18 +14,24 @@ export interface GlobalUser {
   email: string;
   phone: string;
   avatar: string;
-  role: 'driver' | 'passenger' | 'traveler' | 'concert_goer' | 'host' | 'multi_role';
+  role: 'driver' | 'passenger' | 'traveler' | 'concert_goer' | 'host' | 'multi_role' | 'user' | 'admin' | string;
   modules: ('carpooling' | 'concerts' | 'trips' | 'stranger-meets')[];
-  status: 'active' | 'suspended' | 'pending';
-  kycStatus: 'verified' | 'pending' | 'unverified';
+  status: 'active' | 'suspended' | 'pending' | string;
+  kycStatus: 'verified' | 'pending' | 'unverified' | 'rejected' | string;
+  isKYC?: boolean;
+  isEmailVerified?: boolean;
   city: string;
   country: string;
   joinedDate: string;
   lastActive: string;
   rating: number;
   totalActivities: number; // total rides, trips, meets, concerts
+  totalRidesPublished?: number;
+  totalBookings?: number;
   totalSpentOrEarned: string;
   trustScore: number; // 0 - 100%
+  govtIdNumber?: string;
+  govtIdProof?: string;
   vehicleDetails?: {
     model: string;
     plate: string;
@@ -34,6 +40,8 @@ export interface GlobalUser {
   idDocument?: string;
   badges: string[];
   bio?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Driver {
@@ -51,6 +59,11 @@ export interface Driver {
   vehiclePlate: string;
   vehicleColor: string;
   joinedDate: string;
+  govtIdNumber?: string | null;
+  govtIdProof?: string | null;
+  isKYC?: boolean;
+  isEmailVerified?: boolean;
+  KYCStatus?: 'verified' | 'pending' | 'rejected' | string;
 }
 
 export interface Waypoint {

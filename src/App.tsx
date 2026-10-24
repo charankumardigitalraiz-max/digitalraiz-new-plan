@@ -3,8 +3,6 @@ import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-
 import type {
   NavigationTab,
   CarpoolRide,
-  CarpoolCardCount,
-  CarpoolPagination,
   ConcertEvent,
   TripPlan,
   Driver,
@@ -40,8 +38,8 @@ import { CreateStrangerMeetModal } from './components/stranger-meet/CreateStrang
 import { SettingsView } from './components/system/SettingsView';
 import { HelpView } from './components/system/HelpView';
 import { Login } from './components/auth/Login';
-import { authService, carpoolService } from './services';
-import type { AdminUser } from './types/index'
+import { authService, carpoolService, driverService } from './services';
+import type { AdminUser } from './types/index';
 
 export function App() {
   const location = useLocation();
@@ -52,6 +50,21 @@ export function App() {
     return authService.getCurrentUser();
   });
 
+  // Listen for global session expiry events (triggered by 401 / Invalid or expired token)
+  useEffect(() => {
+    const handleSessionExpired = (event: Event) => {
+      const customEvent = event as CustomEvent<{ message?: string }>;
+      setCurrentUser(null);
+      navigate('/', { replace: true });
+      showToast(customEvent.detail?.message || 'Invalid or expired token. Please log in again.');
+    };
+
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    return () => {
+      window.removeEventListener('auth:session-expired', handleSessionExpired);
+    };
+  }, [navigate]);
+
   // Verify profile via API if token is present
   useEffect(() => {
     const token = authService.getToken();
@@ -61,36 +74,18 @@ export function App() {
         .then((profile) => {
           if (profile) setCurrentUser(profile);
         })
-        .catch(() => {
-          // Token expired or server unreachable, fallback to stored user session
+        .catch((err) => {
+          // If token verification fails due to expiration or invalid token, terminate session
+          if (
+            err?.status === 401 ||
+            err?.message?.toLowerCase().includes('token') ||
+            err?.message?.toLowerCase().includes('expired')
+          ) {
+            authService.clearAllAuth();
+            setCurrentUser(null);
+          }
         });
     }
-  }, []);
-
-  // Carpool Metadata State (from real backend /api/admin/carpool/rides)
-  const [carpoolCardCount, setCarpoolCardCount] = useState<CarpoolCardCount | null>(null);
-  const [carpoolPagination, setCarpoolPagination] = useState<CarpoolPagination | null>(null);
-
-  const fetchCarpoolRides = (page = 1) => {
-    carpoolService
-      .getRidesWithMeta({ page, limit: 20 })
-      .then((res) => {
-        if (Array.isArray(res.rides)) {
-          setRides(res.rides);
-        }
-        if (res.cardCount) {
-          setCarpoolCardCount(res.cardCount);
-        }
-        if (res.pagination) {
-          setCarpoolPagination(res.pagination);
-        }
-      })
-      .catch(() => { });
-  };
-
-  // Fetch real carpool rides from backend on mount
-  useEffect(() => {
-    fetchCarpoolRides(1);
   }, []);
 
   // Derive active tab and subTab from current React Router pathname
@@ -213,9 +208,27 @@ export function App() {
   };
 
   // Driver KYC Handlers
-  const handleVerifyDriver = (driverId: string, status: 'verified' | 'rejected' | 'pending') => {
-    setDrivers(drivers.map(d => d.id === driverId ? { ...d, verificationStatus: status } : d));
-    showToast(status === 'verified' ? 'Driver approved & KYC verified!' : `Driver verification set to ${status}.`);
+  const handleVerifyDriver = async (driverId: string, status: 'verified' | 'rejected' | 'pending') => {
+    try {
+      await driverService.verifyDriver(driverId, status);
+      setDrivers((prev) =>
+        prev.map((d) =>
+          d.id === driverId
+            ? {
+              ...d,
+              verificationStatus: status,
+              isKYC: status === 'verified'
+            }
+            : d
+        )
+      );
+      showToast(status === 'verified' ? 'Driver approved & KYC verified!' : `Driver verification set to ${status}.`);
+    } catch {
+      setDrivers((prev) =>
+        prev.map((d) => (d.id === driverId ? { ...d, verificationStatus: status } : d))
+      );
+      showToast(`Driver verification updated.`);
+    }
   };
 
   // Stranger Meet Handlers
@@ -361,9 +374,6 @@ export function App() {
               path="/carpooling/overview"
               element={
                 <CarpoolOverview
-                  rides={rides}
-                  drivers={drivers}
-                  cardCount={carpoolCardCount}
                   onNavigateSubTab={(sub) => navigate(`/carpooling/${sub}`)}
                   onSelectRide={(ride) => navigate(`/carpooling/rides/${ride.id}`)}
                   onOpenCreateModal={() => setIsCreateRideOpen(true)}
@@ -374,9 +384,6 @@ export function App() {
               path="/carpooling/rides"
               element={
                 <CarpoolDashboard
-                  rides={rides}
-                  cardCount={carpoolCardCount}
-                  pagination={carpoolPagination}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   onSelectRide={(ride) => navigate(`/carpooling/rides/${ride.id}`)}
@@ -389,7 +396,6 @@ export function App() {
               path="/carpooling/rides/:rideId"
               element={
                 <RideDetailScreen
-                  rides={rides}
                   onStatusChange={handleUpdateRideStatus}
                   onDeleteRide={handleDeleteRide}
                 />
@@ -399,10 +405,8 @@ export function App() {
               path="/carpooling/verifications"
               element={
                 <DriverVerificationScreen
-                  drivers={drivers}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
-                  onVerifyDriver={(id, status) => handleVerifyDriver(id, status)}
                   onViewDriverDetails={(driver) => navigate(`/users/${driver.id}?tab=kyc`)}
                 />
               }

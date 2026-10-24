@@ -1,0 +1,180 @@
+================================================================================
+WAYFER API CURL COMMANDS - ADMIN CARPOOL DASHBOARD (ALL-IN-ONE API)
+Base URL: http://localhost:5000/api/admin/carpool
+================================================================================
+
+All admin carpool endpoints require an active Bearer Token of a user with role 'admin'.
+
+================================================================================
+GET CARPOOL DASHBOARD OVERVIEW (ALL-IN-ONE)
+================================================================================
+Consolidates all carpool metrics, driver verification counts, expressway corridor
+shares, timeframe analytics trends, and recent ride & booking activities into a
+single unified response.
+
+Method: GET
+Endpoint: /api/admin/carpool/dashboard/overview
+
+Query Parameters:
+- timeframe (optional): '7D', '30D' (default), '90D', '12M'
+- corridorLimit (optional): Number of top corridors to return (default: 5)
+
+cURL Command:
+curl -X GET "http://localhost:5000/api/admin/carpool/dashboard/overview?timeframe=30D&corridorLimit=5" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/carpool/dashboard/overview?timeframe=30D&corridorLimit=5" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "metrics": {
+      "rides": {
+        "total": 25,
+        "active": 18,
+        "upcoming": 14,
+        "completed": 5,
+        "cancelled": 2
+      },
+      "bookings": {
+        "total": 12,
+        "confirmed": 10,
+        "completed": 2,
+        "cancelled": 0
+      },
+      "seats": {
+        "totalSeatsOffered": 75,
+        "totalSeatsBooked": 28,
+        "availableSeats": 47,
+        "occupancyRate": 37
+      },
+      "financials": {
+        "totalGMV": 7000,
+        "avgFare": 583,
+        "currency": "₹"
+      },
+      "drivers": {
+        "verified": 3,
+        "pending": 2,
+        "total": 5
+      }
+    },
+    "analytics": {
+      "timeframe": "30D",
+      "totalRevenue": 45000,
+      "totalVolume": 180,
+      "series": [
+        {
+          "date": "2026-10-01",
+          "label": "Oct 1",
+          "fullDate": "Oct 1, 2026",
+          "revenue": 6200,
+          "volume": 24
+        },
+        {
+          "date": "2026-10-05",
+          "label": "Oct 5",
+          "fullDate": "Oct 5, 2026",
+          "revenue": 7100,
+          "volume": 28
+        },
+        {
+          "date": "2026-10-09",
+          "label": "Oct 9",
+          "fullDate": "Oct 9, 2026",
+          "revenue": 6800,
+          "volume": 26
+        },
+        {
+          "date": "2026-10-13",
+          "label": "Oct 13",
+          "fullDate": "Oct 13, 2026",
+          "revenue": 8300,
+          "volume": 32
+        },
+        {
+          "date": "2026-10-17",
+          "label": "Oct 17",
+          "fullDate": "Oct 17, 2026",
+          "revenue": 9200,
+          "volume": 35
+        },
+        {
+          "date": "2026-10-20",
+          "label": "Oct 20",
+          "fullDate": "Oct 20, 2026",
+          "revenue": 7400,
+          "volume": 30
+        }
+      ]
+    },
+    "topCorridors": [
+      {
+        "corridor": "Hyderabad ↔ Warangal",
+        "originCity": "Hyderabad",
+        "destinationCity": "Warangal",
+        "rideCount": 8,
+        "totalSeats": 24,
+        "bookedSeats": 18,
+        "totalRevenue": 4500,
+        "avgPrice": 250,
+        "distanceKm": 142.5
+      },
+      {
+        "corridor": "Mumbai ↔ Pune",
+        "originCity": "Mumbai",
+        "destinationCity": "Pune",
+        "rideCount": 6,
+        "totalSeats": 18,
+        "bookedSeats": 15,
+        "totalRevenue": 3600,
+        "avgPrice": 240,
+        "distanceKm": 148.0
+      }
+    ],
+    "recentRides": [
+      {
+        "id": 1,
+        "publisherId": 1,
+        "publisher": {
+          "id": 1,
+          "name": "Rajender Reddy",
+          "email": "rajender@example.com",
+          "phone": "+919876543210"
+        },
+        "origin": {
+          "address": "Kukatpally, Hyderabad, Telangana",
+          "lat": 17.4965678,
+          "lng": 78.392344
+        },
+        "destination": {
+          "address": "Warangal, Warangal mandal, Warangal, Telangana",
+          "lat": 17.9820644,
+          "lng": 79.5970954
+        },
+        "departureTime": "2026-10-25T08:30:00.000Z",
+        "availableSeats": 3,
+        "totalSeats": 3,
+        "pricePerSeat": 250,
+        "status": "active",
+        "vehicleModel": "Honda City 2022",
+        "vehicleNumber": "TS-09-AB-1234"
+      }
+    ],
+    "recentBookings": [
+      {
+        "id": 1,
+        "rideId": 1,
+        "passengerId": 2,
+        "seatsBooked": 2,
+        "totalAmount": 500,
+        "paymentStatus": "paid",
+        "bookingStatus": "confirmed",
+        "createdAt": "2026-10-23T14:35:00.000Z",
+        "updatedAt": "2026-10-23T14:35:00.000Z"
+      }
+    ]
+  }
+}

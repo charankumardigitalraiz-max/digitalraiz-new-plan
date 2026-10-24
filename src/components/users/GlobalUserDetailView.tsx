@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -38,35 +38,101 @@ import {
   Search,
   X,
   Filter,
-  ChevronDown
+  ChevronDown,
+  Loader2,
+  Edit3
 } from 'lucide-react';
 import type { GlobalUser } from '../../types';
-import { mockGlobalUsers } from '../../data/mockUsers';
 import { MetricCard, Table, type Column } from '../common';
+import { userService, type UserCardCount } from '../../services';
+
+function extractAddress(location: any, fallback: string = ''): string {
+  if (!location) return fallback;
+  if (typeof location === 'string') return location;
+  if (typeof location === 'object') {
+    return location.address || location.name || location.city || fallback;
+  }
+  return fallback;
+}
 
 interface GlobalUserDetailViewProps {
   onShowToast?: (message: string) => void;
 }
 
 type DetailTab = 'bookings' | 'kyc' | 'financials' | 'reviews';
-type BookingModuleFilter = 'all' | 'carpool' | 'concerts' | 'trips' | 'meets';
+type BookingModuleFilter = 'all' | 'carpool' | 'published' | 'booked';
 
 export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onShowToast }) => {
   const { userId } = useParams<{ userId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Find user from mock dataset or default to first
-  const [currentUser, setCurrentUser] = useState<GlobalUser | undefined>(() => {
-    return (
-      mockGlobalUsers.find(
-        u =>
-          u.id === userId ||
-          u.id === userId?.replace('drv-0', 'usr-00').replace('drv-', 'usr-') ||
-          u.email.toLowerCase() === userId?.toLowerCase()
-      ) || mockGlobalUsers[0]
-    );
+  const [currentUser, setCurrentUser] = useState<GlobalUser | undefined>(undefined);
+  const [cardCount, setCardCount] = useState<UserCardCount | undefined>(undefined);
+  const [userPublishedRides, setUserPublishedRides] = useState<any[]>([]);
+  const [userBookings, setUserBookings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Edit Profile Form State
+  const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    role: 'user'
   });
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState<boolean>(false);
+
+  // Edit KYC Form State
+  const [isEditingKyc, setIsEditingKyc] = useState<boolean>(false);
+  const [kycForm, setKycForm] = useState({
+    isKYC: true,
+    isEmailVerified: true,
+    govtIdNumber: '',
+    govtIdProof: ''
+  });
+  const [isSubmittingKyc, setIsSubmittingKyc] = useState<boolean>(false);
+
+  // Fetch user details from API
+  useEffect(() => {
+    if (!userId) return;
+    let isMounted = true;
+    setIsLoading(true);
+
+    userService
+      .getUserById(userId)
+      .then((res) => {
+        if (!isMounted) return;
+        if (res?.user) {
+          setCurrentUser(res.user);
+          setCardCount(res.cardCount);
+          setUserPublishedRides(res.publishedRides || []);
+          setUserBookings(res.bookings || []);
+          setEditForm({
+            name: res.user.name,
+            phone: res.user.phone,
+            email: res.user.email,
+            role: res.user.role || 'user'
+          });
+          setKycForm({
+            isKYC: Boolean(res.user.isKYC || res.user.kycStatus === 'verified'),
+            isEmailVerified: Boolean(res.user.isEmailVerified),
+            govtIdNumber: res.user.govtIdNumber || res.user.idDocument || '',
+            govtIdProof: res.user.govtIdProof || ''
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to load user details:', err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
 
   const tabParam = searchParams.get('tab') as DetailTab | null;
   const [activeTab, setActiveTab] = useState<DetailTab>(() => {
@@ -84,6 +150,18 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationMsg, setNotificationMsg] = useState('');
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-slate-200/90 bg-white p-16 text-center shadow-2xs space-y-3">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+        <h3 className="text-sm font-semibold text-slate-900">Loading Customer Profile</h3>
+        <p className="text-xs text-slate-400">Fetching customer account records, bookings and verifications...</p>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (
@@ -122,15 +200,111 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
     onShowToast?.(`Copied ${fieldName} to clipboard`);
   };
 
-  const handleApproveKyc = () => {
-    setCurrentUser(prev => prev ? { ...prev, kycStatus: 'verified', status: 'active', trustScore: 99 } : undefined);
-    onShowToast?.(`KYC Approved for ${currentUser.name}. Account is now fully verified.`);
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    setIsSubmittingProfile(true);
+    try {
+      const updated = await userService.updateUser(currentUser.id, {
+        name: editForm.name,
+        phone: editForm.phone,
+        email: editForm.email,
+        role: editForm.role
+      });
+      setCurrentUser((prev) => (prev ? { ...prev, ...updated } : updated));
+      setIsEditingProfile(false);
+      onShowToast?.('Customer profile updated successfully.');
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to update profile.');
+    } finally {
+      setIsSubmittingProfile(false);
+    }
   };
 
-  const handleToggleStatus = () => {
+  const handleUpdateKyc = async (isApproved: boolean) => {
+    if (!currentUser) return;
+    try {
+      await userService.updateUserKyc(currentUser.id, {
+        isKYC: isApproved,
+        isEmailVerified: isApproved ? true : kycForm.isEmailVerified,
+        govtIdNumber: kycForm.govtIdNumber,
+        govtIdProof: kycForm.govtIdProof
+      });
+      setCurrentUser((prev) =>
+        prev
+          ? {
+            ...prev,
+            isKYC: isApproved,
+            kycStatus: isApproved ? 'verified' : 'rejected',
+            isEmailVerified: isApproved ? true : prev.isEmailVerified,
+            trustScore: isApproved ? 99 : 70
+          }
+          : undefined
+      );
+      onShowToast?.(
+        isApproved
+          ? `KYC Approved for ${currentUser.name}. Account is now fully verified.`
+          : `KYC rejected for ${currentUser.name}.`
+      );
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to update KYC status.');
+    }
+  };
+
+  const handleSaveKycDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    setIsSubmittingKyc(true);
+    try {
+      await userService.updateUserKyc(currentUser.id, kycForm);
+      setCurrentUser((prev) =>
+        prev
+          ? {
+            ...prev,
+            isKYC: kycForm.isKYC,
+            kycStatus: kycForm.isKYC ? 'verified' : 'pending',
+            isEmailVerified: kycForm.isEmailVerified,
+            govtIdNumber: kycForm.govtIdNumber,
+            govtIdProof: kycForm.govtIdProof
+          }
+          : undefined
+      );
+      setIsEditingKyc(false);
+      onShowToast?.('KYC verification status & document updated successfully.');
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to update KYC documentation.');
+    } finally {
+      setIsSubmittingKyc(false);
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    if (!currentUser) return;
     const nextStatus = currentUser.status === 'active' ? 'suspended' : 'active';
-    setCurrentUser(prev => prev ? { ...prev, status: nextStatus } : undefined);
-    onShowToast?.(`Account status changed to ${nextStatus}.`);
+    try {
+      await userService.updateUser(currentUser.id, { status: nextStatus });
+      setCurrentUser((prev) => (prev ? { ...prev, status: nextStatus } : undefined));
+      onShowToast?.(`Customer account status changed to ${nextStatus}.`);
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to update account status.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+    if (
+      window.confirm(
+        `Are you sure you want to permanently delete user account '${currentUser.name}'? This action cannot be undone.`
+      )
+    ) {
+      try {
+        const res = await userService.deleteUser(currentUser.id);
+        onShowToast?.(res.message || `Customer account deleted successfully.`);
+        navigate('/users');
+      } catch (err: any) {
+        onShowToast?.(err.message || 'Failed to delete customer account.');
+      }
+    }
   };
 
   const handleSendNotification = (e: React.FormEvent) => {
@@ -141,216 +315,95 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
     onShowToast?.(`Direct message sent to ${currentUser.name} (${currentUser.email}).`);
   };
 
-  // Mock cross-module bookings tailored to this user
-  const userCarpoolRides = [
-    {
-      id: 'BK-CP-8910',
+  // Dynamic carpool rides & bookings mapped directly from backend /api/admin/users/:id response
+  const apiPublishedRides = userPublishedRides.map((ride: any, idx: number) => {
+    const originStr = extractAddress(ride.origin, 'Origin');
+    const destStr = extractAddress(ride.destination, 'Destination');
+    const departure = ride.departureTime ? new Date(ride.departureTime) : null;
+    const vehicleInfo = ride.vehicleModel
+      ? `${ride.vehicleModel}${ride.vehicleNumber ? ` (${ride.vehicleNumber})` : (ride.vehiclePlate ? ` (${ride.vehiclePlate})` : '')}`
+      : (currentUser.vehicleDetails
+        ? `${currentUser.vehicleDetails.model} (${currentUser.vehicleDetails.plate})`
+        : 'Carpool Vehicle');
+
+    const seatsInfo = ride.totalSeats !== undefined
+      ? `${ride.availableSeats ?? 0}/${ride.totalSeats} seats`
+      : `${ride.availableSeats ?? ride.seats ?? 0} seats`;
+
+    return {
+      id: String(ride.id || ride.rideId || `RD-${idx + 1}`),
       type: 'carpool',
-      title: `${currentUser.city} ➔ Pune Central Expressway`,
-      origin: `${currentUser.city} Terminal 2`,
-      destination: 'Pune Shivaji Nagar',
-      date: 'Oct 26, 2026',
-      time: '08:30 AM',
-      role: currentUser.role === 'driver' ? 'Driver / Host' : 'Passenger',
-      seats: currentUser.role === 'driver' ? '3 of 4 Filled' : 'Seat #2A Booked',
-      amount: currentUser.role === 'driver' ? '₹1,350 Earned' : '₹450 Paid',
-      vehicle: currentUser.vehicleDetails ? `${currentUser.vehicleDetails.model} (${currentUser.vehicleDetails.plate})` : 'Toyota Innova Crysta (MH-12-BF-4412)',
-      status: 'Active / Upcoming'
-    },
-    {
-      id: 'BK-CP-7712',
+      title: `${originStr} ➔ ${destStr}`,
+      origin: originStr,
+      destination: destStr,
+      date: departure && !isNaN(departure.getTime())
+        ? new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          }).format(departure)
+        : (ride.departureDate || 'Scheduled'),
+      time: departure && !isNaN(departure.getTime())
+        ? new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }).format(departure)
+        : 'Flexible',
+      role: 'Driver / Publisher',
+      seats: seatsInfo,
+      amount: ride.pricePerSeat !== undefined ? `₹${ride.pricePerSeat} / seat` : (ride.fare ? `₹${ride.fare}` : '₹0'),
+      vehicle: vehicleInfo,
+      status: ride.status ? (ride.status.charAt(0).toUpperCase() + ride.status.slice(1)) : 'Active'
+    };
+  });
+
+  const apiBookedRides = userBookings.map((bk: any, idx: number) => {
+    const originStr = extractAddress(bk.pickupLocation || bk.origin || bk.ride?.origin, 'Pickup Point');
+    const destStr = extractAddress(bk.dropLocation || bk.destination || bk.ride?.destination, 'Drop Point');
+    const bkDate = bk.createdAt ? new Date(bk.createdAt) : null;
+    const seatsCount = bk.seatsBooked || bk.seats || 1;
+
+    return {
+      id: String(bk.id || bk.bookingId || `BK-${idx + 1}`),
       type: 'carpool',
-      title: 'Bengaluru ➔ Mysuru Highway Corridor',
-      origin: 'Silk Board Junction',
-      destination: 'Mysuru Palace Gate',
-      date: 'Oct 18, 2026',
-      time: '07:00 AM',
+      title: `${originStr} ➔ ${destStr}`,
+      origin: originStr,
+      destination: destStr,
+      date: bkDate && !isNaN(bkDate.getTime())
+        ? new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          }).format(bkDate)
+        : 'Recent',
+      time: bkDate && !isNaN(bkDate.getTime())
+        ? new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }).format(bkDate)
+        : 'Booked',
       role: 'Passenger',
-      seats: 'Seat #1B',
-      amount: '₹380 Paid',
-      vehicle: 'Hyundai Creta SX (KA-03-MK-9912)',
-      status: 'Completed'
-    },
-    {
-      id: 'BK-CP-6241',
-      type: 'carpool',
-      title: 'Delhi NCR ➔ Agra Yamuna Expressway',
-      origin: 'Noida City Center',
-      destination: 'Taj East Gate Road',
-      date: 'Sep 29, 2026',
-      time: '06:15 AM',
-      role: currentUser.role === 'driver' ? 'Driver / Host' : 'Passenger',
-      seats: currentUser.role === 'driver' ? '4 of 4 Filled' : 'Seat #3',
-      amount: currentUser.role === 'driver' ? '₹2,400 Earned' : '₹600 Paid',
-      vehicle: currentUser.vehicleDetails ? `${currentUser.vehicleDetails.model} (${currentUser.vehicleDetails.plate})` : 'Honda City V (DL-01-AX-9921)',
-      status: 'Completed'
-    }
-  ];
+      seats: `${seatsCount} Seat${seatsCount > 1 ? 's' : ''}`,
+      amount: bk.totalAmount !== undefined ? `₹${bk.totalAmount} Paid` : (bk.fare ? `₹${bk.fare} Paid` : 'Paid'),
+      vehicle: bk.vehicle || bk.ride?.vehicleModel || 'Carpool Vehicle',
+      status: bk.status ? (bk.status.charAt(0).toUpperCase() + bk.status.slice(1)) : 'Confirmed'
+    };
+  });
 
-  const userConcerts = [
-    {
-      id: 'BK-CN-4412',
-      type: 'concerts',
-      title: 'Coldplay: Music of the Spheres World Tour',
-      venue: 'DY Patil Sports Stadium, Mumbai',
-      date: 'Jan 18, 2027',
-      time: '06:00 PM',
-      tier: 'VIP Platinum Lounge',
-      passes: '2 Tickets',
-      amount: '₹14,500 Paid',
-      bookingCode: 'COLD-MUM-88192',
-      status: 'Confirmed'
-    },
-    {
-      id: 'BK-CN-3391',
-      type: 'concerts',
-      title: 'Diljit Dosanjh: Dil-Luminati Tour India',
-      venue: 'JLN Stadium, New Delhi',
-      date: 'Nov 12, 2026',
-      time: '07:00 PM',
-      tier: 'Gold Standing Zone',
-      passes: '1 Ticket',
-      amount: '₹5,500 Paid',
-      bookingCode: 'DIL-DEL-33911',
-      status: 'Confirmed'
-    },
-    {
-      id: 'BK-CN-2018',
-      type: 'concerts',
-      title: 'Sunburn Goa Festival 2026 Finale',
-      venue: 'Vagator Beach Arena, North Goa',
-      date: 'Dec 30, 2026',
-      time: '04:00 PM',
-      tier: 'Early Bird 3-Day Pass',
-      passes: '2 Tickets',
-      amount: '₹9,800 Paid',
-      bookingCode: 'SUN-GOA-20184',
-      status: 'Confirmed'
-    }
-  ];
-
-  const userTrips = [
-    {
-      id: 'BK-TR-9021',
-      type: 'trips',
-      title: 'Himachal & Spiti Valley 4x4 Expedition',
-      destination: 'Manali, Kaza, Chandratal & Key Monastery',
-      date: 'Nov 02 - Nov 09, 2026',
-      duration: '7 Days / 6 Nights',
-      role: currentUser.role === 'driver' || currentUser.role === 'multi_role' ? 'Expedition Convoy Leader' : 'Confirmed Adventurer',
-      companions: '8 Road Companions',
-      amount: '₹18,500 Contribution',
-      status: 'Upcoming Departure'
-    },
-    {
-      id: 'BK-TR-8102',
-      type: 'trips',
-      title: 'Coastal Karnataka & Gokarna Beach Haven',
-      destination: 'Gokarna, Murudeshwar & Dandeli',
-      date: 'Oct 02 - Oct 05, 2026',
-      duration: '4 Days / 3 Nights',
-      role: 'Co-Traveler',
-      companions: '6 Travelers',
-      amount: '₹8,200 Contribution',
-      status: 'Completed'
-    }
-  ];
-
-  const userStrangerMeets = [
-    {
-      id: 'BK-SM-5102',
-      type: 'meets',
-      title: 'Sunset Photography Walk & Artisan Brews',
-      venue: 'Bandra Bandstand Promenade, Mumbai',
-      category: 'City Walk & Food',
-      date: 'Oct 25, 2026 • 05:00 PM',
-      role: currentUser.role === 'host' ? 'Community Host' : 'Confirmed RSVP',
-      attendees: '16 Attending',
-      status: 'Confirmed'
-    },
-    {
-      id: 'BK-SM-4019',
-      type: 'meets',
-      title: 'Weekend Board Games & Founders Chai',
-      venue: 'Third Wave Coffee, Indiranagar, Bengaluru',
-      category: 'Coffee & Chill',
-      date: 'Oct 12, 2026 • 04:30 PM',
-      role: 'Participant',
-      attendees: '12 Attending',
-      status: 'Completed'
-    }
-  ];
-
-  const userTransactions = [
-    {
-      id: 'TX-990142',
-      date: 'Oct 23, 2026',
-      module: 'carpool',
-      title: 'Carpool Passenger Fare',
-      description: 'Mumbai to Pune Seat #2A',
-      paymentMethod: 'HDFC UPI (•••• 8912)',
-      amount: '+₹450.00',
-      isCredit: true,
-      status: 'Completed'
-    },
-    {
-      id: 'TX-984102',
-      date: 'Oct 18, 2026',
-      module: 'concerts',
-      title: 'Concert Platinum Pass',
-      description: 'Coldplay World Tour (2 Passes)',
-      paymentMethod: 'Visa Platinum (•••• 4018)',
-      amount: '-₹14,500.00',
-      isCredit: false,
-      status: 'Completed'
-    },
-    {
-      id: 'TX-970119',
-      date: 'Oct 02, 2026',
-      module: 'trips',
-      title: 'Trip Organizer Escrow Payout',
-      description: 'Gokarna Coastal Haven',
-      paymentMethod: 'Direct Bank NEFT',
-      amount: '+₹18,500.00',
-      isCredit: true,
-      status: 'Completed'
-    },
-    {
-      id: 'TX-961028',
-      date: 'Sep 29, 2026',
-      module: 'carpool',
-      title: 'Driver Escrow Payout',
-      description: 'Delhi NCR to Agra Corridor (4 Seats)',
-      paymentMethod: 'Direct Bank IMPS',
-      amount: '+₹2,400.00',
-      isCredit: true,
-      status: 'Completed'
-    },
-    {
-      id: 'TX-948210',
-      date: 'Sep 15, 2026',
-      module: 'meets',
-      title: 'Stranger Meet Host Stipend',
-      description: 'Sunset Photography Walk',
-      paymentMethod: 'Razorpay UPI (•••• 3391)',
-      amount: '+₹1,200.00',
-      isCredit: true,
-      status: 'Completed'
-    }
-  ];
-
-  // Combined bookings filtered by sub-category & search query
+  // Purely dynamic bookings & published rides from backend API
   const allBookings = [
-    ...userCarpoolRides,
-    ...userConcerts,
-    ...userTrips,
-    ...userStrangerMeets
+    ...apiPublishedRides,
+    ...apiBookedRides
   ].filter(b => {
-    // 1. Module filter
-    if (bookingFilter === 'carpool' && b.type !== 'carpool') return false;
-    if (bookingFilter === 'concerts' && b.type !== 'concerts') return false;
-    if (bookingFilter === 'trips' && b.type !== 'trips') return false;
-    if (bookingFilter === 'meets' && b.type !== 'meets') return false;
+    // 1. Role / Type filter
+    if (bookingFilter === 'published' && b.role !== 'Driver / Publisher') return false;
+    if (bookingFilter === 'booked' && b.role !== 'Passenger') return false;
 
     // 2. Search query filter
     if (bookingSearchQuery.trim()) {
@@ -384,46 +437,42 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
   const bookingColumns: Column<any>[] = [
     {
       key: 'type',
-      header: 'Module & ID',
-      width: '140px',
+      header: 'Type & Reference',
+      width: '160px',
       render: (item) => {
-        const isCarpool = item.type === 'carpool';
-        const isConcert = item.type === 'concerts';
-        const isTrip = item.type === 'trips';
-        const isMeet = item.type === 'meets';
-
+        const isDriver = item.role.includes('Driver');
+        const shortId = item.id.length > 10 ? `#${item.id.slice(-6).toUpperCase()}` : item.id;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div
-              className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border ${isCarpool
-                ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                : isConcert
-                  ? 'bg-purple-50 text-purple-600 border-purple-100'
-                  : isTrip
-                    ? 'bg-amber-50 text-amber-600 border-amber-100'
-                    : 'bg-sky-50 text-sky-600 border-sky-100'
-                }`}
+              className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                isDriver
+                  ? 'bg-emerald-100 text-emerald-700 border-emerald-300 shadow-2xs'
+                  : 'bg-indigo-100 text-indigo-700 border-indigo-300 shadow-2xs'
+              }`}
             >
-              {isCarpool && <Car className="h-3.5 w-3.5" />}
-              {isConcert && <Music className="h-3.5 w-3.5" />}
-              {isTrip && <MapPin className="h-3.5 w-3.5" />}
-              {isMeet && <Sparkles className="h-3.5 w-3.5" />}
+              {isDriver ? <Car className="h-4 w-4" /> : <Ticket className="h-4 w-4" />}
             </div>
-            <div>
+            <div className="min-w-0">
               <span
-                className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${isCarpool
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : isConcert
-                    ? 'bg-purple-50 text-purple-700'
-                    : isTrip
-                      ? 'bg-amber-50 text-amber-700'
-                      : 'bg-sky-50 text-sky-700'
-                  }`}
+                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-2xs ${
+                  isDriver
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : 'bg-indigo-50 text-indigo-800 border-indigo-300'
+                }`}
               >
-                {item.type}
+                <span
+                  className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                    isDriver ? 'bg-emerald-600' : 'bg-indigo-600'
+                  }`}
+                />
+                {isDriver ? 'Published' : 'Booking'}
               </span>
-              <span className="font-mono text-[10px] text-slate-400 font-semibold block mt-0.5">
-                {item.id}
+              <span
+                className="font-mono text-[11px] font-semibold text-slate-600 block mt-0.5 tracking-tight truncate cursor-default"
+                title={item.id}
+              >
+                {shortId}
               </span>
             </div>
           </div>
@@ -432,33 +481,22 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
     },
     {
       key: 'title',
-      header: 'Booking & Route / Location',
-      render: (item) => {
-        const subtext =
-          item.type === 'carpool'
-            ? `${item.origin} ➔ ${item.destination} • ${item.vehicle}`
-            : item.type === 'concerts'
-              ? `${item.venue}${item.bookingCode ? ` • Ref: ${item.bookingCode}` : ''}`
-              : item.type === 'trips'
-                ? `${item.destination} • ${item.duration}`
-                : `${item.venue}${item.category ? ` • ${item.category}` : ''}`;
-
-        return (
-          <div className="py-0.5">
-            <div className="font-semibold text-slate-900 text-xs leading-snug">
-              {item.title}
-            </div>
-            <div className="text-[11px] text-slate-500 mt-0.5 truncate max-w-xs sm:max-w-sm">
-              {subtext}
-            </div>
+      header: 'Route & Transit Details',
+      render: (item) => (
+        <div className="py-0.5">
+          <div className="font-semibold text-slate-900 text-xs leading-snug">
+            {item.title}
           </div>
-        );
-      }
+          <div className="text-[11px] text-slate-500 mt-0.5 truncate max-w-xs sm:max-w-sm">
+            {item.origin} ➔ {item.destination} • {item.vehicle}
+          </div>
+        </div>
+      )
     },
     {
       key: 'schedule',
       header: 'Date & Time',
-      width: '220px',
+      width: '180px',
       className: 'whitespace-nowrap',
       headerClassName: 'whitespace-nowrap',
       render: (item) => (
@@ -471,58 +509,27 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
               {item.time}
             </div>
           )}
-          {item.duration && (
-            <div className="text-[11px] text-amber-700 font-medium mt-0.5">
-              {item.duration}
-            </div>
-          )}
         </div>
       )
     },
     {
       key: 'details',
-      header: 'Reservation Details',
-      width: '140px',
-      render: (item) => {
-        if (item.type === 'carpool') {
-          return (
-            <div className="text-xs">
-              <span className="font-medium text-slate-800">{item.seats}</span>
-              <span className="text-[11px] text-slate-400 block">{item.role}</span>
-            </div>
-          );
-        }
-        if (item.type === 'concerts') {
-          return (
-            <div className="text-xs">
-              <span className="font-medium text-purple-700">{item.tier}</span>
-              <span className="text-[11px] text-slate-400 block">{item.passes}</span>
-            </div>
-          );
-        }
-        if (item.type === 'trips') {
-          return (
-            <div className="text-xs">
-              <span className="font-medium text-amber-700">{item.companions}</span>
-              <span className="text-[11px] text-slate-400 block">{item.role}</span>
-            </div>
-          );
-        }
-        return (
-          <div className="text-xs">
-            <span className="font-medium text-sky-700">{item.attendees}</span>
-            <span className="text-[11px] text-slate-400 block">{item.role}</span>
-          </div>
-        );
-      }
+      header: 'Seat Allocation',
+      width: '160px',
+      render: (item) => (
+        <div className="text-xs">
+          <span className="font-medium text-slate-800">{item.seats}</span>
+          <span className="text-[11px] text-slate-400 block">{item.role}</span>
+        </div>
+      )
     },
     {
       key: 'amount',
-      header: 'Amount / Fare',
-      width: '110px',
+      header: 'Fare / Amount',
+      width: '120px',
       render: (item) => (
         <span className="font-bold text-slate-900 text-xs">
-          {item.amount || 'Free RSVP'}
+          {item.amount}
         </span>
       )
     },
@@ -539,8 +546,8 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
         return (
           <span
             className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${isUpcoming
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
-              : 'bg-slate-100 text-slate-600 border border-slate-200/80'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
+                : 'bg-slate-100 text-slate-600 border border-slate-200/80'
               }`}
           >
             {item.status}
@@ -777,18 +784,27 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 <div className="flex items-center gap-1 font-medium text-slate-700">
                   <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                   <span>{currentUser.rating.toFixed(2)}</span>
-                  <span className="text-slate-400 font-normal">({currentUser.totalActivities})</span>
+                  <span className="text-slate-400 font-normal">({cardCount?.totalActivities ?? (userPublishedRides.length + userBookings.length)} total)</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-            {currentUser.kycStatus === 'pending' && (
+          <div className="flex items-center gap-2 self-start md:self-auto shrink-0 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsEditingProfile(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer"
+            >
+              <Edit3 className="h-3.5 w-3.5 text-slate-500" />
+              <span>Edit Profile</span>
+            </button>
+
+            {(!currentUser.isKYC || currentUser.kycStatus === 'pending') && (
               <button
                 type="button"
-                onClick={handleApproveKyc}
+                onClick={() => handleUpdateKyc(true)}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-all cursor-pointer"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -800,12 +816,22 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
               type="button"
               onClick={handleToggleStatus}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all cursor-pointer ${currentUser.status === 'active'
-                ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700 border border-slate-200'
+                ? 'bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-800 border border-slate-200'
                 : 'bg-emerald-600 text-white hover:bg-emerald-500'
                 }`}
             >
               <AlertTriangle className="h-3.5 w-3.5" />
               <span>{currentUser.status === 'active' ? 'Suspend Account' : 'Reactivate Customer'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-600 hover:text-white px-2.5 py-1.5 text-xs font-semibold text-rose-700 shadow-2xs transition-all cursor-pointer"
+              title="Delete Account Permanently"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Delete</span>
             </button>
           </div>
         </div>
@@ -815,30 +841,44 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Total Spend / Volume"
-          value={currentUser.totalSpentOrEarned}
+          value={
+            cardCount?.totalSpent !== undefined
+              ? `₹${cardCount.totalSpent}`
+              : (userBookings.length > 0 || userPublishedRides.length > 0
+                ? (currentUser.totalSpentOrEarned || '₹0')
+                : '₹0')
+          }
           subtext="Verified platform payments"
           icon={Wallet}
           accentColor="indigo"
         />
         <MetricCard
-          label="Carpool Journeys"
-          value="148 Rides"
-          subtext="Intercity completed journeys"
+          label="Published Rides"
+          value={`${cardCount?.totalRidesPublished ?? userPublishedRides.length} Rides`}
+          subtext={
+            cardCount
+              ? `${cardCount.activeRides ?? 0} Active • ${cardCount.completedRides ?? 0} Done`
+              : 'Driver offered routes'
+          }
           icon={Car}
           accentColor="emerald"
         />
         <MetricCard
-          label="Concert Passes"
-          value="5 Passes"
-          subtext="Live events & stadium tours"
+          label="Passenger Bookings"
+          value={`${cardCount?.totalBookings ?? userBookings.length} Bookings`}
+          subtext={
+            cardCount
+              ? `${cardCount.confirmedBookings ?? 0} Confirmed • ${cardCount.completedBookings ?? 0} Done`
+              : 'Confirmed seat reservations'
+          }
           icon={Ticket}
           accentColor="purple"
         />
         <MetricCard
-          label="Trips & Meets"
-          value="6 Expeditions"
-          subtext="Community & travel groups"
-          icon={Compass}
+          label="Trust Score"
+          value={`${currentUser.trustScore}% Verified`}
+          subtext={currentUser.isKYC || currentUser.kycStatus === 'verified' ? 'Fully verified KYC' : 'Pending verification'}
+          icon={ShieldCheck}
           accentColor="amber"
         />
       </div>
@@ -878,7 +918,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
             <span>KYC & Document Verification</span>
           </button>
 
-          <button
+          {/* <button
             type="button"
             onClick={() => setActiveTab('financials')}
             className={`flex items-center gap-2 py-3.5 border-b-2 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer whitespace-nowrap -mb-px ${activeTab === 'financials'
@@ -888,7 +928,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
           >
             <Wallet className={`h-4 w-4 ${activeTab === 'financials' ? 'text-indigo-600' : 'text-slate-400'}`} />
             <span>Financials & Invoices</span>
-          </button>
+          </button> */}
 
           <button
             type="button"
@@ -951,19 +991,13 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                       className="appearance-none h-10 rounded-lg border border-slate-200 bg-slate-50/70 pl-9 pr-9 py-2 text-xs sm:text-[13px] font-medium text-slate-700 outline-none transition-all hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 cursor-pointer shadow-2xs"
                     >
                       <option value="all">
-                        All Bookings ({userCarpoolRides.length + userConcerts.length + userTrips.length + userStrangerMeets.length})
+                        All Records ({apiPublishedRides.length + apiBookedRides.length})
                       </option>
-                      <option value="carpool">
-                        Carpool Rides ({userCarpoolRides.length})
+                      <option value="published">
+                        Published Rides ({apiPublishedRides.length})
                       </option>
-                      <option value="concerts">
-                        Concerts & Festivals ({userConcerts.length})
-                      </option>
-                      <option value="trips">
-                        Expeditions & Trips ({userTrips.length})
-                      </option>
-                      <option value="meets">
-                        Stranger Meets ({userStrangerMeets.length})
+                      <option value="booked">
+                        Passenger Bookings ({apiBookedRides.length})
                       </option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
@@ -976,8 +1010,8 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 data={allBookings}
                 columns={bookingColumns}
                 keyExtractor={(item) => item.id}
-                emptyMessage="No bookings found"
-                emptySubtext="This customer does not have any bookings in this module category."
+                emptyMessage="No rides or bookings found"
+                emptySubtext="This customer has not published any rides or booked any journeys yet."
                 emptyIcon={Calendar}
                 hoverClassName="hover:bg-slate-50/70"
                 pagination={{
@@ -1011,46 +1045,65 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                       <p className="text-[11px] text-slate-400">National ID, Aadhaar or Passport verification</p>
                     </div>
                   </div>
-                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                    Verified
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${currentUser.isKYC || currentUser.kycStatus === 'verified'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    }`}>
+                    {currentUser.isKYC || currentUser.kycStatus === 'verified' ? 'Verified' : 'Pending Verification'}
                   </span>
                 </div>
 
                 <div className="rounded-lg bg-slate-50 border border-slate-200/80 p-3.5 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Document Type</span>
-                    <span className="font-semibold text-slate-800">Passport / National Citizen ID</span>
+                    <span className="text-slate-400">ID Number / Code</span>
+                    <span className="font-mono font-semibold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                      {currentUser.govtIdNumber || currentUser.idDocument || 'Not provided'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Document Number</span>
-                    <span className="font-mono font-medium text-slate-800">{currentUser.idDocument || 'ID-DOC-889104'}</span>
+                    <span className="text-slate-400">Proof Document</span>
+                    <span className="font-mono text-[11px] text-slate-600 truncate max-w-[200px]" title={currentUser.govtIdProof || currentUser.idDocument || 'No document uploaded'}>
+                      {currentUser.govtIdProof || currentUser.idDocument || 'No document uploaded'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Issuing Authority</span>
-                    <span className="font-medium text-slate-800">{currentUser.country} Ministry of Interior</span>
+                    <span className="text-slate-400">Email Verification</span>
+                    <span className={`font-semibold ${currentUser.isEmailVerified ? 'text-emerald-700' : 'text-slate-500'}`}>
+                      {currentUser.isEmailVerified ? 'Verified' : 'Unverified'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Biometric Facial Match</span>
-                    <span className="font-semibold text-emerald-700">99.4% Match (Passed)</span>
+                    <span className="text-slate-400">Trust Score</span>
+                    <span className="font-semibold text-emerald-700">{currentUser.trustScore}% Verified</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {(!currentUser.isKYC || currentUser.kycStatus !== 'verified') ? (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateKyc(true)}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white py-2 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Approve & Verify KYC</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateKyc(false)}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <span>Revoke KYC</span>
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => onShowToast?.('Opening encrypted document scan in audit viewer.')}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                    onClick={() => setIsEditingKyc(true)}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
                   >
-                    <Eye className="h-3.5 w-3.5 text-slate-400" />
-                    <span>View Full Scan</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onShowToast?.('Certificate downloaded to local storage.')}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-                    title="Download Verification Proof"
-                  >
-                    <Download className="h-3.5 w-3.5 text-slate-400" />
+                    <Edit3 className="h-3.5 w-3.5 text-slate-500" />
+                    <span>Update KYC Info</span>
                   </button>
                 </div>
               </div>
@@ -1080,13 +1133,13 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Registered Vehicle</span>
                     <span className="font-medium text-slate-800">
-                      {currentUser.vehicleDetails ? `${currentUser.vehicleDetails.model} (${currentUser.vehicleDetails.color})` : 'Toyota RAV4 Hybrid'}
+                      {currentUser.vehicleDetails ? `${currentUser.vehicleDetails.model} (${currentUser.vehicleDetails.color})` : 'No vehicle registered'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">License Plate</span>
                     <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {currentUser.vehicleDetails ? currentUser.vehicleDetails.plate : 'MH-01-DW-8819'}
+                      {currentUser.vehicleDetails ? currentUser.vehicleDetails.plate : 'Not available'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -1110,7 +1163,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
           )}
 
           {/* 7. TAB 3: FINANCIALS & INVOICES */}
-          {activeTab === 'financials' && (
+          {/* {activeTab === 'financials' && (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -1127,7 +1180,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 </button>
               </div>
 
-              {/* Financials Table using shared Table component */}
+             
               <Table
                 data={userTransactions}
                 columns={financialColumns}
@@ -1150,7 +1203,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 }}
               />
             </div>
-          )}
+          )} */}
 
           {/* 8. TAB 4: REVIEWS & COMMUNITY FEEDBACK */}
           {activeTab === 'reviews' && (
@@ -1167,48 +1220,12 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="rounded-lg bg-slate-50/70 border border-slate-100 p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
-                        LM
-                      </div>
-                      <div>
-                        <span className="text-xs font-semibold text-slate-900">Lucas Martin</span>
-                        <span className="text-[11px] text-slate-400 block">Carpool Passenger • Paris to Brussels</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                      <span>5.0</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    "Super smooth highway drive. The car was spotless, arrived right on time at Porte Maillot, and made great conversation. Would definitely ride again!"
-                  </p>
-                </div>
-
-                <div className="rounded-lg bg-slate-50/70 border border-slate-100 p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
-                        AR
-                      </div>
-                      <div>
-                        <span className="text-xs font-semibold text-slate-900">Aarav Roy</span>
-                        <span className="text-[11px] text-slate-400 block">Concert Companion • Coldplay Mumbai</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                      <span>5.0</span>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    "Extremely reliable organizer! Coordinated the stadium entrance seamlessly and shared shuttle passes with the entire group."
-                  </p>
-                </div>
+              <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center space-y-2">
+                <Star className="h-8 w-8 text-slate-300 mx-auto" />
+                <h4 className="text-sm font-semibold text-slate-700">No Reviews Recorded</h4>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  This customer has not received any reviews or ratings from fellow travelers yet.
+                </p>
               </div>
             </div>
           )}
@@ -1273,6 +1290,195 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-500 transition-all cursor-pointer"
                 >
                   Send Transmission
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 p-5">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <Edit3 className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Edit Customer Profile</h3>
+                  <p className="text-[11px] text-slate-400">Update customer personal details & directory role</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditingProfile(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Role</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none bg-white"
+                >
+                  <option value="user">User / Member</option>
+                  <option value="driver">Fleet Driver</option>
+                  <option value="admin">Administrator</option>
+                  <option value="passenger">Passenger</option>
+                  <option value="traveler">Trip Explorer</option>
+                  <option value="concert_goer">Concert VIP</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingProfile(false)}
+                  disabled={isSubmittingProfile}
+                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingProfile}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingProfile && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  <span>{isSubmittingProfile ? 'Saving...' : 'Save Changes'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit KYC Details Modal */}
+      {isEditingKyc && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl animate-in fade-in zoom-in-95 overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 p-5">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">Update KYC & Verification</h3>
+                  <p className="text-[11px] text-slate-400">Update govt ID document number & verification compliance</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditingKyc(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveKycDetails} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Government ID Number (Aadhaar / PAN)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. AADHAAR-8932-1245-7890"
+                  value={kycForm.govtIdNumber}
+                  onChange={(e) => setKycForm({ ...kycForm, govtIdNumber: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none font-mono text-[11px]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Document Proof File Path / URL</label>
+                <input
+                  type="text"
+                  placeholder="e.g. /uploads/kyc/user_1_proof.jpg"
+                  value={kycForm.govtIdProof}
+                  onChange={(e) => setKycForm({ ...kycForm, govtIdProof: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none font-mono text-[11px]"
+                />
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 space-y-2">
+                <label className="flex items-center gap-2 text-slate-700 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={kycForm.isKYC}
+                    onChange={(e) => setKycForm({ ...kycForm, isKYC: e.target.checked })}
+                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <span className="font-semibold text-slate-800">Identity Verified (isKYC: true)</span>
+                </label>
+
+                <label className="flex items-center gap-2 text-slate-700 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={kycForm.isEmailVerified}
+                    onChange={(e) => setKycForm({ ...kycForm, isEmailVerified: e.target.checked })}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Email Address Verified</span>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingKyc(false)}
+                  disabled={isSubmittingKyc}
+                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingKyc}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingKyc && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  <span>{isSubmittingKyc ? 'Updating...' : 'Update KYC Record'}</span>
                 </button>
               </div>
             </form>

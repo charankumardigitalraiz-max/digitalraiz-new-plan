@@ -1,0 +1,211 @@
+================================================================================
+WAYFER API CURL COMMANDS - ADMIN USER MANAGEMENT
+Base URL: http://localhost:5000/api/admin
+================================================================================
+
+All endpoints require an active Bearer Token of a user with role 'admin'.
+
+================================================================================
+1. GET ALL USERS (With search, role filter, kycStatus filter, and pagination)
+--------------------------------------------------------------------------------
+curl -X GET "http://localhost:5000/api/admin/users?page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+# Filter by role and kycStatus:
+curl -X GET "http://localhost:5000/api/admin/users?role=user&kycStatus=verified&page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+# Keyword search:
+curl -X GET "http://localhost:5000/api/admin/users?search=Rajender" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/users?page=1&limit=20" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "pagination": {
+      "total": 1,
+      "page": 1,
+      "limit": 20,
+      "totalPages": 1
+    },
+    "summary": {
+      "totalUsers": 1,
+      "verifiedKYC": 1,
+      "pendingKYC": 0
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Rajender Reddy",
+        "email": "rajender@example.com",
+        "phone": "+919876543210",
+        "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=160",
+        "role": "user",
+        "modules": ["carpooling"],
+        "status": "active",
+        "kycStatus": "verified",
+        "isKYC": true,
+        "isEmailVerified": true,
+        "city": "Hyderabad",
+        "country": "India",
+        "joinedDate": "Oct 2026",
+        "lastActive": "Oct 24",
+        "rating": 4.9,
+        "totalActivities": 4,
+        "totalRidesPublished": 3,
+        "totalBookings": 1,
+        "totalSpentOrEarned": "₹750",
+        "trustScore": 98,
+        "govtIdNumber": "AADHAAR-8932-1245-7890",
+        "govtIdProof": "/uploads/kyc/driver_1_aadhaar.pdf",
+        "idDocument": "/uploads/kyc/driver_1_aadhaar.pdf",
+        "badges": ["KYC Verified", "Wayfer Member"],
+        "createdAt": "2026-10-23T14:30:00.000Z",
+        "updatedAt": "2026-10-24T12:00:00.000Z"
+      }
+    ]
+  }
+}
+
+================================================================================
+2. GET USER DETAILS BY ID (With Published Rides & Bookings)
+--------------------------------------------------------------------------------
+curl -X GET http://localhost:5000/api/admin/users/1 \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/users/1" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "1",
+      "name": "Rajender Reddy",
+      "email": "rajender@example.com",
+      "phone": "+919876543210",
+      "role": "user",
+      "kycStatus": "verified",
+      "isKYC": true,
+      "isEmailVerified": true,
+      "govtIdNumber": "AADHAAR-8932-1245-7890",
+      "govtIdProof": "/uploads/kyc/driver_1_aadhaar.pdf"
+    },
+    "publishedRides": [],
+    "bookings": []
+  }
+}
+
+================================================================================
+3. CREATE NEW USER (Admin Action)
+--------------------------------------------------------------------------------
+curl -X POST http://localhost:5000/api/admin/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "name": "Suresh Kumar",
+    "email": "suresh@example.com",
+    "phone": "+919811223344",
+    "password": "Password@123",
+    "role": "user",
+    "isKYC": true,
+    "isEmailVerified": true,
+    "govtIdNumber": "PAN-ABCD1234E"
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/users" -Method Post -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"name":"Suresh Kumar","email":"suresh@example.com","phone":"+919811223344","password":"Password@123","role":"user","isKYC":true,"isEmailVerified":true,"govtIdNumber":"PAN-ABCD1234E"}'
+
+Sample Response (201 Created):
+{
+  "status": "success",
+  "message": "User created successfully",
+  "data": {
+    "user": {
+      "id": "2",
+      "name": "Suresh Kumar",
+      "email": "suresh@example.com",
+      "phone": "+919811223344",
+      "role": "user",
+      "kycStatus": "verified"
+    }
+  }
+}
+
+================================================================================
+4. UPDATE USER PROFILE (Name, Email, Phone, Role)
+--------------------------------------------------------------------------------
+curl -X PATCH http://localhost:5000/api/admin/users/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "name": "Rajender Reddy Updated",
+    "phone": "+919876543211"
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/users/1" -Method Patch -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"name":"Rajender Reddy Updated","phone":"+919876543211"}'
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "User updated successfully",
+  "data": {
+    "user": {
+      "id": "1",
+      "name": "Rajender Reddy Updated",
+      "phone": "+919876543211"
+    }
+  }
+}
+
+================================================================================
+5. UPDATE USER KYC & VERIFICATION STATUS
+--------------------------------------------------------------------------------
+curl -X PATCH http://localhost:5000/api/admin/users/1/kyc \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "isKYC": true,
+    "isEmailVerified": true,
+    "govtIdNumber": "AADHAAR-8932-1245-7890",
+    "govtIdProof": "/uploads/kyc/user_1_proof.jpg"
+  }'
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/users/1/kyc" -Method Patch -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"isKYC":true,"isEmailVerified":true,"govtIdNumber":"AADHAAR-8932-1245-7890","govtIdProof":"/uploads/kyc/user_1_proof.jpg"}'
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "User KYC status updated successfully",
+  "data": {
+    "user": {
+      "id": "1",
+      "kycStatus": "verified",
+      "isKYC": true,
+      "isEmailVerified": true
+    }
+  }
+}
+
+================================================================================
+6. DELETE USER ACCOUNT (Admin Override)
+--------------------------------------------------------------------------------
+curl -X DELETE http://localhost:5000/api/admin/users/1 \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/users/1" -Method Delete -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "User 'Rajender Reddy' deleted successfully."
+}
+================================================================================

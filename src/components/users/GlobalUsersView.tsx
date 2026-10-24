@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users,
@@ -29,23 +29,27 @@ import {
   BadgeCheck,
   FileText,
   Trash2,
-  UserPlus
+  UserPlus,
+  Loader2
 } from 'lucide-react';
 import type { GlobalUser } from '../../types';
 import { mockGlobalUsers } from '../../data/mockUsers';
 import { Table, type Column, Pagination, MetricCard } from '../common';
+import { userService } from '../../services';
 
 interface GlobalUsersViewProps {
   onShowToast?: (message: string) => void;
 }
 
 type ModuleFilter = 'all' | 'carpooling' | 'concerts' | 'trips' | 'stranger-meets';
-type RoleFilter = 'all' | 'driver' | 'passenger' | 'traveler' | 'concert_goer' | 'host' | 'multi_role';
+type RoleFilter = 'all' | 'driver' | 'passenger' | 'traveler' | 'concert_goer' | 'host' | 'multi_role' | 'user' | 'admin';
 type KycFilter = 'all' | 'verified' | 'pending' | 'unverified';
 
 export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast }) => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<GlobalUser[]>(mockGlobalUsers);
+  const [users, setUsers] = useState<GlobalUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModule, setSelectedModule] = useState<ModuleFilter>('all');
   const [selectedRole, setSelectedRole] = useState<RoleFilter>('all');
@@ -54,15 +58,50 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [totalServerUsers, setTotalServerUsers] = useState(0);
+  const [summary, setSummary] = useState({
+    totalUsers: 0,
+    verifiedKYC: 0,
+    pendingKYC: 0
+  });
+
+  // Fetch users from backend API
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await userService.getUsers({
+        page: currentPage,
+        limit: pageSize,
+        role: selectedRole,
+        kycStatus: selectedKyc,
+        search: searchQuery
+      });
+      setUsers(res.users);
+      setTotalServerUsers(res.pagination.total);
+      setSummary(res.summary);
+    } catch (err) {
+      console.warn('Error fetching users:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, pageSize, selectedRole, selectedKyc, searchQuery]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // New User Form State
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     phone: '',
-    city: 'Mumbai',
+    password: 'Password@123',
+    city: 'Hyderabad',
     country: 'India',
-    role: 'passenger' as GlobalUser['role'],
+    role: 'user',
+    isKYC: true,
+    isEmailVerified: true,
+    govtIdNumber: '',
     modules: ['carpooling'] as GlobalUser['modules'],
     kycStatus: 'verified' as GlobalUser['kycStatus'],
     vehicleModel: '',
@@ -71,119 +110,113 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
   });
 
   // KPI Computations
-  const totalUsersCount = users.length;
-  const verifiedDriversCount = users.filter(u => (u.role === 'driver' || u.role === 'multi_role') && u.kycStatus === 'verified').length;
+  const totalUsersCount = summary.totalUsers || users.length;
+  const verifiedDriversCount = users.filter(u => (u.role === 'driver' || u.role === 'multi_role') && (u.kycStatus === 'verified' || u.isKYC)).length;
   const activePassengersAndAttendees = users.filter(u => u.status === 'active' && u.role !== 'driver').length;
-  const pendingKycCount = users.filter(u => u.kycStatus === 'pending').length;
+  const pendingKycCount = summary.pendingKYC ?? users.filter(u => u.kycStatus === 'pending').length;
 
-  // Filtered Users List
+  // Filtered Users List (with module client-side filtering)
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      // Search matching
-      const query = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !query ||
-        user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.phone.toLowerCase().includes(query) ||
-        user.city.toLowerCase().includes(query) ||
-        user.id.toLowerCase().includes(query) ||
-        (user.vehicleDetails && user.vehicleDetails.plate.toLowerCase().includes(query));
-
       // Module filter
       const matchesModule =
         selectedModule === 'all' || user.modules.includes(selectedModule);
 
-      // Role filter
-      const matchesRole =
-        selectedRole === 'all' || user.role === selectedRole;
-
-      // KYC filter
-      const matchesKyc =
-        selectedKyc === 'all' || user.kycStatus === selectedKyc;
-
-      return matchesSearch && matchesModule && matchesRole && matchesKyc;
+      return matchesModule;
     });
-  }, [users, searchQuery, selectedModule, selectedRole, selectedKyc]);
+  }, [users, selectedModule]);
 
   // Actions
-  const handleVerifyKyc = (userId: string, e?: React.MouseEvent) => {
+  const handleVerifyKyc = async (userId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setUsers(prev =>
-      prev.map(u => (u.id === userId ? { ...u, kycStatus: 'verified', status: 'active', trustScore: 98 } : u))
-    );
-    onShowToast?.(`User identity verified successfully.`);
-  };
-
-  const handleToggleStatus = (userId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setUsers(prev =>
-      prev.map(u => {
-        if (u.id === userId) {
-          const newStatus = u.status === 'active' ? 'suspended' : 'active';
-          return { ...u, status: newStatus };
-        }
-        return u;
-      })
-    );
-    onShowToast?.(`User account status updated.`);
-  };
-
-  const handleDeleteUser = (userId: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (window.confirm('Are you sure you want to remove this user from the directory?')) {
-      setUsers(prev => prev.filter(u => u.id !== userId));
-      onShowToast?.(`User removed from global directory.`);
+    try {
+      await userService.updateUserKyc(userId, {
+        isKYC: true,
+        isEmailVerified: true
+      });
+      setUsers(prev =>
+        prev.map(u => (u.id === userId ? { ...u, kycStatus: 'verified', isKYC: true, isEmailVerified: true, trustScore: 98 } : u))
+      );
+      onShowToast?.(`User identity verified successfully.`);
+      fetchUsers();
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to verify KYC status.');
     }
   };
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleToggleStatus = async (user: GlobalUser, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const newStatus = user.status === 'active' ? 'suspended' : 'active';
+    try {
+      await userService.updateUser(user.id, { status: newStatus });
+      setUsers(prev =>
+        prev.map(u => (u.id === user.id ? { ...u, status: newStatus } : u))
+      );
+      onShowToast?.(`User status updated to ${newStatus}.`);
+      fetchUsers();
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to update user status.');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const targetUser = users.find(u => u.id === userId);
+    const targetName = targetUser?.name || 'this customer';
+    if (window.confirm(`Are you sure you want to remove '${targetName}' from the directory? This will remove the account.`)) {
+      try {
+        const res = await userService.deleteUser(userId);
+        setUsers(prev => prev.filter(u => u.id !== userId));
+        onShowToast?.(res.message || `User '${targetName}' deleted successfully.`);
+        fetchUsers();
+      } catch (err: any) {
+        onShowToast?.(err.message || 'Failed to delete user.');
+      }
+    }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUser.name || !newUser.email) return;
 
-    const created: GlobalUser = {
-      id: `usr-${String(users.length + 1).padStart(3, '0')}`,
-      name: newUser.name,
-      email: newUser.email,
-      phone: newUser.phone || '+91 98000 00000',
-      avatar: `https://images.unsplash.com/photo-${1534528741775 + users.length}?w=150&auto=format&fit=crop&q=80`,
-      role: newUser.role,
-      modules: newUser.modules.length > 0 ? newUser.modules : ['carpooling'],
-      status: 'active',
-      kycStatus: newUser.kycStatus,
-      city: newUser.city || 'Mumbai',
-      country: newUser.country || 'India',
-      joinedDate: 'Oct 23, 2026',
-      lastActive: 'Just now',
-      rating: 5.0,
-      totalActivities: 1,
-      totalSpentOrEarned: newUser.role === 'driver' ? '₹0 Earned' : '₹0 Spent',
-      trustScore: newUser.kycStatus === 'verified' ? 95 : 80,
-      vehicleDetails: newUser.vehicleModel ? {
-        model: newUser.vehicleModel,
-        plate: newUser.vehiclePlate || 'MH-01-NEW',
-        color: 'White'
-      } : undefined,
-      badges: ['New Member'],
-      bio: newUser.bio || 'New member of ORBITA global mobility network.'
-    };
+    setIsSubmitting(true);
+    try {
+      const created = await userService.createUser({
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone || '+91 98000 00000',
+        password: newUser.password || 'Password@123',
+        role: newUser.role,
+        isKYC: newUser.isKYC,
+        isEmailVerified: newUser.isEmailVerified,
+        govtIdNumber: newUser.govtIdNumber
+      });
 
-    setUsers([created, ...users]);
-    setIsAddUserModalOpen(false);
-    setNewUser({
-      name: '',
-      email: '',
-      phone: '',
-      city: 'Mumbai',
-      country: 'India',
-      role: 'passenger',
-      modules: ['carpooling'],
-      kycStatus: 'verified',
-      vehicleModel: '',
-      vehiclePlate: '',
-      bio: ''
-    });
-    onShowToast?.(`New user ${created.name} added to global directory.`);
+      setIsAddUserModalOpen(false);
+      setNewUser({
+        name: '',
+        email: '',
+        phone: '',
+        password: 'Password@123',
+        city: 'Hyderabad',
+        country: 'India',
+        role: 'user',
+        isKYC: true,
+        isEmailVerified: true,
+        govtIdNumber: '',
+        modules: ['carpooling'],
+        kycStatus: 'verified',
+        vehicleModel: '',
+        vehiclePlate: '',
+        bio: ''
+      });
+      onShowToast?.(`New customer '${created.name}' registered successfully.`);
+      fetchUsers();
+    } catch (err: any) {
+      onShowToast?.(err.message || 'Failed to create user account.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleExportCSV = () => {
@@ -425,6 +458,9 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
             <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
               Directory
             </span>
+            {isLoading && (
+              <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+            )}
           </div>
           <p className="text-[13px] font-normal text-slate-500 mt-0.5 max-w-2xl">
             Manage customer accounts, bookings, driver verifications, and activity across all services.
@@ -478,18 +514,18 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
           accentColor="purple"
         />
 
-        <div
-          onClick={() => setSelectedKyc(selectedKyc === 'pending' ? 'all' : 'pending')}
-          className="cursor-pointer transition-transform hover:scale-[1.01]"
-        >
-          <MetricCard
-            label="KYC Review Queue"
-            value={`${pendingKycCount} Pending`}
-            subtext={selectedKyc === 'pending' ? 'Active Filter: Showing Pending' : 'Click to filter pending'}
-            icon={AlertCircle}
-            accentColor="amber"
-          />
-        </div>
+        {/* <div
+          // onClick={() => setSelectedKyc(selectedKyc === 'pending' ? 'all' : 'pending')}
+          // className="cursor-pointer transition-transform hover:scale-[1.01]"
+        > */}
+        <MetricCard
+          label="KYC Review Queue"
+          value={`${pendingKycCount} Pending`}
+          subtext={selectedKyc === 'pending' ? 'Active Filter: Showing Pending' : 'Click to filter pending'}
+          icon={AlertCircle}
+          accentColor="amber"
+        />
+        {/* </div> */}
       </div>
 
       {/* 3. Unified Attached Card: Header, Controls & Table / Grid */}
@@ -622,11 +658,11 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
             emptyIcon={Users}
             // onRowClick={(user) => navigate(`/users/${user.id}`)}
             containerClassName="border-0 rounded-none shadow-none"
-            hoverClassName="hover:bg-slate-50/80"
+            // hoverClassName="hover:bg-slate-50/80"
             pagination={{
               currentPage,
               pageSize,
-              totalItems: filteredUsers.length,
+              totalItems: totalServerUsers || filteredUsers.length,
               onPageChange: setCurrentPage,
               onPageSizeChange: (newSize) => {
                 setPageSize(newSize);
@@ -795,11 +831,11 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
 
             <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Full Name</label>
+                <label className="block font-semibold text-slate-700 mb-1">Full Name *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Priya Nair"
+                  placeholder="e.g. Suresh Kumar"
                   value={newUser.name}
                   onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
@@ -808,21 +844,22 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Email Address</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Email Address *</label>
                   <input
                     type="email"
                     required
-                    placeholder="priya@example.com"
+                    placeholder="suresh@example.com"
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone Number *</label>
                   <input
                     type="text"
-                    placeholder="+91 98200 12345"
+                    required
+                    placeholder="+919811223344"
                     value={newUser.phone}
                     onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
@@ -832,30 +869,75 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Password</label>
+                  <input
+                    type="password"
+                    placeholder="Password@123"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
+                  />
+                </div>
+                <div>
                   <label className="block font-semibold text-slate-700 mb-1">Primary Role</label>
                   <select
                     value={newUser.role}
-                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value as GlobalUser['role'] })}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none bg-white"
                   >
-                    <option value="passenger">Passenger</option>
+                    <option value="user">User / Member</option>
                     <option value="driver">Fleet Driver</option>
+                    <option value="admin">Administrator</option>
+                    <option value="passenger">Passenger</option>
                     <option value="traveler">Trip Explorer</option>
                     <option value="concert_goer">Concert VIP</option>
-                    <option value="host">Community Host</option>
-                    <option value="multi_role">Multi-Role</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Government ID / Aadhaar / PAN</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. PAN-ABCD1234E"
+                    value={newUser.govtIdNumber}
+                    onChange={(e) => setNewUser({ ...newUser, govtIdNumber: e.target.value })}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none font-mono text-[11px]"
+                  />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">City</label>
                   <input
                     type="text"
-                    placeholder="Mumbai"
+                    placeholder="Hyderabad"
                     value={newUser.city}
                     onChange={(e) => setNewUser({ ...newUser, city: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 focus:border-indigo-500 focus:outline-none"
                   />
                 </div>
+              </div>
+
+              {/* KYC and Email verification checkboxes */}
+              <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 flex items-center justify-between gap-4">
+                <label className="flex items-center gap-2 text-slate-700 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={newUser.isKYC}
+                    onChange={(e) => setNewUser({ ...newUser, isKYC: e.target.checked })}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Mark KYC Verified</span>
+                </label>
+                <label className="flex items-center gap-2 text-slate-700 text-xs cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={newUser.isEmailVerified}
+                    onChange={(e) => setNewUser({ ...newUser, isEmailVerified: e.target.checked })}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Email Verified</span>
+                </label>
               </div>
 
               {/* Driver vehicle inputs if role is driver */}
@@ -899,15 +981,18 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
                 <button
                   type="button"
                   onClick={() => setIsAddUserModalOpen(false)}
-                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
+                  disabled={isSubmitting}
+                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer"
+                  disabled={isSubmitting}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
                 >
-                  Register User
+                  {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  <span>{isSubmitting ? 'Registering...' : 'Register User'}</span>
                 </button>
               </div>
             </form>

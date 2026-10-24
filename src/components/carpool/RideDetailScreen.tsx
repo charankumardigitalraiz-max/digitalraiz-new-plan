@@ -29,9 +29,9 @@ import { carpoolService } from '../../services';
 import { Badge } from '../common/Badge';
 
 interface RideDetailScreenProps {
-  rides: CarpoolRide[];
-  onStatusChange: (rideId: string, newStatus: 'active' | 'completed' | 'cancelled') => void;
-  onDeleteRide: (rideId: string) => void;
+  rides?: CarpoolRide[];
+  onStatusChange?: (rideId: string, newStatus: 'active' | 'completed' | 'cancelled') => void;
+  onDeleteRide?: (rideId: string) => void;
 }
 
 export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
@@ -45,18 +45,45 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
   const [copiedLicense, setCopiedLicense] = useState(false);
   const [backendPassengerList, setBackendPassengerList] = useState<BackendPassenger[]>([]);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | string | null>(null);
+  const [fetchedRide, setFetchedRide] = useState<CarpoolRide | null>(null);
+  const [isLoadingRide, setIsLoadingRide] = useState<boolean>(!rides || !rides.find((r) => r.id === rideId));
 
-  const ride = rides.find((r) => r.id === rideId);
+  const ride = rides?.find((r) => r.id === rideId) || fetchedRide;
 
   useEffect(() => {
     if (rideId) {
-      carpoolService.getRideById(rideId).then((res) => {
-        if (res?.data?.passengerList && Array.isArray(res.data.passengerList)) {
-          setBackendPassengerList(res.data.passengerList);
-        }
-      }).catch(() => {});
+      setIsLoadingRide(true);
+      carpoolService
+        .getRideById(rideId)
+        .then((res) => {
+          if (res?.data?.ride) {
+            const mapped = carpoolService.mapBackendRideToCarpoolRide(
+              res.data.ride,
+              res.data.passengerList || []
+            );
+            setFetchedRide(mapped);
+          }
+          if (res?.data?.passengerList && Array.isArray(res.data.passengerList)) {
+            setBackendPassengerList(res.data.passengerList);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setIsLoadingRide(false));
     }
   }, [rideId]);
+
+  const handleStatusUpdate = async (newStatus: 'active' | 'completed' | 'cancelled') => {
+    if (!ride) return;
+    try {
+      await carpoolService.updateRideStatus(ride.id, newStatus);
+      setFetchedRide((prev) => (prev ? { ...prev, status: newStatus } : null));
+    } catch (err) {
+      console.warn('API update ride status error:', err);
+    }
+    if (onStatusChange) {
+      onStatusChange(ride.id, newStatus);
+    }
+  };
 
   const handleCancelBooking = async (bookingId: number | string) => {
     if (!window.confirm(`Cancel booking #${bookingId} and restore seat allocation back to this ride?`)) return;
@@ -85,13 +112,29 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
     setTimeout(() => setCopiedLicense(false), 2000);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!ride) return;
     if (window.confirm(`Are you sure you want to remove ride #${ride.id} (${ride.originCity} to ${ride.destinationCity})?`)) {
-      onDeleteRide(ride.id);
+      try {
+        await carpoolService.deleteRide(ride.id);
+      } catch (err) {
+        console.warn('API delete ride notice:', err);
+      }
+      if (onDeleteRide) onDeleteRide(ride.id);
       navigate('/carpooling/rides');
     }
   };
+
+  if (isLoadingRide) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 text-slate-500">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 animate-spin mb-3">
+          <Car className="h-5 w-5" />
+        </div>
+        <p className="text-xs font-semibold text-slate-600">Retrieving ride manifest...</p>
+      </div>
+    );
+  }
 
   if (!ride) {
     return (
@@ -205,14 +248,14 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
             {ride.status === 'active' && (
               <>
                 <button
-                  onClick={() => onStatusChange(ride.id, 'completed')}
+                  onClick={() => handleStatusUpdate('completed')}
                   className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-medium text-emerald-700 shadow-2xs hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
                 >
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   Mark Trip Completed
                 </button>
                 <button
-                  onClick={() => onStatusChange(ride.id, 'cancelled')}
+                  onClick={() => handleStatusUpdate('cancelled')}
                   className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700 shadow-2xs hover:bg-rose-100 hover:border-rose-300 transition-all cursor-pointer"
                 >
                   <XCircle className="h-4 w-4 text-rose-600" />
@@ -223,7 +266,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
 
             {ride.status !== 'active' && (
               <button
-                onClick={() => onStatusChange(ride.id, 'active')}
+                onClick={() => handleStatusUpdate('active')}
                 className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-medium text-indigo-700 shadow-2xs hover:bg-indigo-100 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="h-4 w-4 text-indigo-600" />

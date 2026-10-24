@@ -1,0 +1,89 @@
+================================================================================
+WAYFER API CURL COMMANDS - ADMIN PRICING CONFIGURATION
+Base URL: http://localhost:5000/api/admin (or http://localhost:5001/api/admin)
+================================================================================
+All admin pricing routes require an active Admin Bearer Token (`role === 'admin'`).
+You can obtain this token by logging in via:
+POST http://localhost:5000/api/admin/auth/login
+--------------------------------------------------------------------------------
+1. GET CURRENT CARPOOL PRICING CONFIG
+--------------------------------------------------------------------------------
+curl -X GET http://localhost:5000/api/admin/pricing \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/pricing" -Method Get -Headers @{"Authorization"="Bearer YOUR_ADMIN_TOKEN"}
+Sample Response (200 OK):
+{
+  "status": "success",
+  "data": {
+    "config": {
+      "id": 1,
+      "key": "main_pricing_config",
+      "carpool": {
+        "pricePerKm": 5.0,
+        "allowedDeviationPercent": 30.0,
+        "minAllowedDeviationPercent": 30.0,
+        "maxAllowedDeviationPercent": 30.0,
+        "platformCharge": 0.0
+      },
+      "updatedAt": "2026-10-23T13:40:00.000Z"
+    }
+  }
+}
+--------------------------------------------------------------------------------
+2. UPDATE CARPOOL PRICING CONFIG (SET PRICE PER KM, DEVIATION, PLATFORM CHARGE)
+--------------------------------------------------------------------------------
+# Example 1: Set ₹100 per km with ±30% allowed deviation and initial 0 platform charge
+curl -X PUT http://localhost:5000/api/admin/pricing \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "carpool": {
+      "pricePerKm": 100.0,
+      "allowedDeviationPercent": 30.0,
+      "platformCharge": 0.0
+    }
+  }'
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/pricing" -Method Put -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"carpool":{"pricePerKm":100.0,"allowedDeviationPercent":30.0,"platformCharge":0.0}}'
+# Example 2: Update only specific fields (flat payload also accepted)
+curl -X PUT http://localhost:5000/api/admin/pricing \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "pricePerKm": 12.5,
+    "allowedDeviationPercent": 25.0
+  }'
+PowerShell:
+Invoke-RestMethod -Uri "http://localhost:5000/api/admin/pricing" -Method Put -Headers @{"Content-Type"="application/json"; "Authorization"="Bearer YOUR_ADMIN_TOKEN"} -Body '{"pricePerKm":12.5,"allowedDeviationPercent":25.0}'
+Sample Response (200 OK):
+{
+  "status": "success",
+  "message": "Carpool pricing configuration updated successfully",
+  "data": {
+    "config": {
+      "id": 1,
+      "key": "main_pricing_config",
+      "carpool": {
+        "pricePerKm": 100.0,
+        "allowedDeviationPercent": 30.0,
+        "platformCharge": 0.0
+      },
+      "updatedAt": "2026-10-23T13:45:00.000Z"
+    }
+  }
+}
+================================================================================
+EXPLANATION OF PRICING FIELDS:
+================================================================================
+- pricePerKm:
+    Standard benchmark rate charged per kilometer (e.g. ₹5/km or ₹100/km).
+    Used by the backend to calculate the suggested price:
+    suggestedPrice = Math.round(distanceKm * pricePerKm)
+- allowedDeviationPercent:
+    The percentage flexibility allowed for ride publishers (e.g. 30%).
+    minAllowedPrice = suggestedPrice * (1 - allowedDeviationPercent / 100)
+    maxAllowedPrice = suggestedPrice * (1 + allowedDeviationPercent / 100)
+- platformCharge:
+    Platform fee added to bookings (default initial value is 0.0).
+================================================================================

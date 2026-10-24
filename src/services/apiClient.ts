@@ -164,6 +164,81 @@ class ApiClient {
     return this.refreshPromise;
   }
 
+  private isSessionExpiring = false;
+
+  /**
+   * Helper to identify if an API response indicates an invalid or expired authentication token
+   */
+  public isTokenExpiredMessage(status: number, data: any): boolean {
+    if (status === 401) {
+      return true;
+    }
+    if (!data) {
+      return false;
+    }
+
+    const rawMsg =
+      typeof data === 'string'
+        ? data
+        : data?.message || data?.error || data?.msg || '';
+
+    if (typeof rawMsg === 'string' && rawMsg.trim()) {
+      const msg = rawMsg.toLowerCase().trim();
+      if (
+        msg.includes('invalid or expired token') ||
+        msg.includes('expired token') ||
+        msg.includes('invalid token') ||
+        msg.includes('token expired') ||
+        msg.includes('jwt expired') ||
+        msg.includes('token has expired') ||
+        msg === 'jwt malformed' ||
+        msg === 'unauthorized'
+      ) {
+        return true;
+      }
+    }
+
+    if (data?.status === 'error' && typeof rawMsg === 'string') {
+      const msg = rawMsg.toLowerCase();
+      if (msg.includes('token') && (msg.includes('invalid') || msg.includes('expired'))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Standard session expiry:
+   * 1. Clear local storage entirely
+   * 2. Clear all tokens and session data
+   * 3. Dispatch global 'auth:session-expired' event to navigate user back to login screen
+   */
+  public triggerSessionExpiry(reason: string = 'Invalid or expired token.'): void {
+    try {
+      localStorage.clear();
+    } catch (e) {
+      console.warn('Failed to clear localStorage on session expiry:', e);
+    }
+    this.clearAllTokens();
+
+    if (this.isSessionExpiring) {
+      return;
+    }
+    this.isSessionExpiring = true;
+    setTimeout(() => {
+      this.isSessionExpiring = false;
+    }, 2000);
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('auth:session-expired', {
+          detail: { message: reason }
+        })
+      );
+    }
+  }
+
   /**
    * Universal Request Handler with Automatic 401 Token Refresh & Retry
    */
@@ -218,25 +293,39 @@ class ApiClient {
         responseData = await response.text().catch(() => null);
       }
 
-      // Handle 401 Unauthorized by attempting automatic Token Refresh
-      if (
-        response.status === 401 &&
-        !skipAuth &&
-        !_isRetry &&
-        !endpoint.includes('/refresh-token') &&
-        !endpoint.includes('/login')
-      ) {
-        const refreshedToken = await this.performTokenRefresh();
-        if (refreshedToken) {
-          // Retry the request once with the newly refreshed access token
-          return this.request<T>(endpoint, {
-            ...options,
-            _isRetry: true
-          });
-        } else {
-          // Both access token and refresh token are invalid/expired
-          this.clearAllTokens();
+      // Check if this endpoint is an unauthenticated auth action (login, register, forgot-password)
+      const isAuthEndpoint =
+        endpoint.includes('/api/admin/auth/login') ||
+        endpoint.includes('/api/admin/auth/register') ||
+        endpoint.includes('/api/admin/auth/forgot-password') ||
+        endpoint.includes('/api/admin/auth/reset-password');
+
+      // Check if backend returned invalid/expired token message or 401 status
+      const isTokenExpired = !isAuthEndpoint && this.isTokenExpiredMessage(response.status, responseData);
+
+      if (isTokenExpired) {
+        // Attempt automatic token refresh once if refresh token is present
+        if (
+          !_isRetry &&
+          !endpoint.includes('/refresh-token') &&
+          Boolean(this.getRefreshToken())
+        ) {
+          const refreshedToken = await this.performTokenRefresh();
+          if (refreshedToken) {
+            return this.request<T>(endpoint, {
+              ...options,
+              _isRetry: true
+            });
+          }
         }
+
+        // Token is invalid/expired and cannot be refreshed: trigger session expiry
+        const reason =
+          responseData?.message ||
+          responseData?.error ||
+          'Invalid or expired token.';
+        this.triggerSessionExpiry(reason);
+        throw new ApiError(reason, 401, responseData);
       }
 
       if (!response.ok) {
