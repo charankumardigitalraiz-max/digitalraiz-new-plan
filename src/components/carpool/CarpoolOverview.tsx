@@ -27,7 +27,7 @@ interface CarpoolOverviewProps {
   rides: CarpoolRide[];
   drivers: Driver[];
   cardCount?: CarpoolCardCount | null;
-  onNavigateSubTab: (subTab: 'rides' | 'verifications') => void;
+  onNavigateSubTab: (subTab: 'rides' | 'verifications' | 'settings') => void;
   onSelectRide: (ride: CarpoolRide) => void;
   onOpenCreateModal: () => void;
 }

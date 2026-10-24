@@ -18,13 +18,15 @@ interface DriverVerificationScreenProps {
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   onVerifyDriver: (driverId: string, status: 'verified' | 'rejected' | 'pending') => void;
+  onViewDriverDetails?: (driver: Driver) => void;
 }
 
 export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> = ({
   drivers,
   searchQuery = '',
   onSearchChange,
-  onVerifyDriver
+  onVerifyDriver,
+  onViewDriverDetails
 }) => {
   const [internalSearch, setInternalSearch] = useState('');
   const searchTerm = onSearchChange ? searchQuery : (searchQuery || internalSearch);
@@ -73,16 +75,16 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
             <h1 className="text-xl sm:text-[22px] font-semibold tracking-tight text-slate-900">
               Driver KYC & License Auditing
             </h1>
-            <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+            {/* <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
               {pendingCount} Pending Review
-            </span>
+            </span> */}
           </div>
           <p className="text-[13px] font-normal text-slate-500 mt-0.5 max-w-2xl">
             Review driver identities, national IDs, licenses and vehicle safety compliance.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
+        {/* <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
           <button
             type="button"
             onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
@@ -94,7 +96,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
             <Clock className="h-3.5 w-3.5" />
             <span>{statusFilter === 'pending' ? 'Showing Pending Queue' : `Audit ${pendingCount} Pending Drivers`}</span>
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Metric Highlights */}
@@ -183,6 +185,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
           <DriverVerificationList
             drivers={filteredDrivers}
             onVerify={onVerifyDriver}
+            onViewDetails={onViewDriverDetails}
           />
         </div>
       </div>

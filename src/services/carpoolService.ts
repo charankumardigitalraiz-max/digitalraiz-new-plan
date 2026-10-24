@@ -296,7 +296,7 @@ class CarpoolService {
       avatar:
         b.publisher?.avatar ||
         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-      rating: 4.9,
+      rating: 5,
       totalRides: 25,
       phone: driverPhone,
       email: driverEmail,

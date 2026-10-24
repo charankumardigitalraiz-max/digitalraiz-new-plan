@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Check, X, FileText, Car, Star, Table as TableIcon, LayoutGrid, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, X, FileText, Car, Star, Table as TableIcon, LayoutGrid, ShieldCheck, Eye } from 'lucide-react';
 import type { Driver } from '../../types';
+import { mockGlobalUsers } from '../../data/mockUsers';
 import { Badge } from '../common/Badge';
 import { Table, type Column } from '../common/Table';
 import { Pagination } from '../common/Pagination';
@@ -8,15 +10,33 @@ import { Pagination } from '../common/Pagination';
 interface DriverVerificationListProps {
   drivers: Driver[];
   onVerify: (driverId: string, status: 'verified' | 'rejected' | 'pending') => void;
+  onViewDetails?: (driver: Driver) => void;
 }
 
 export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
   drivers,
-  onVerify
+  onVerify,
+  onViewDetails
 }) => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+
+  const handleViewDetails = (driver: Driver) => {
+    if (onViewDetails) {
+      onViewDetails(driver);
+      return;
+    }
+    const matchingUser = mockGlobalUsers.find(
+      u =>
+        u.id === driver.id ||
+        u.email.toLowerCase() === driver.email.toLowerCase() ||
+        u.name.toLowerCase() === driver.name.toLowerCase()
+    );
+    const targetId = matchingUser ? matchingUser.id : driver.id;
+    navigate(`/users/${targetId}?tab=kyc`);
+  };
 
   const paginatedDrivers = drivers.slice(
     (currentPage - 1) * pageSize,
@@ -69,12 +89,12 @@ export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
       key: 'kyc',
       header: 'KYC & License Info',
       render: (driver) => (
-        <div className="flex items-center gap-2.5 text-xs">
+        <div className="flex items-center gap-2.5">
           <FileText className="h-4 w-4 text-emerald-600 shrink-0" />
-          <div>
-            <div className="text-slate-700 font-mono text-[11px]">{driver.idDocument}</div>
+          <div className="text-xs">
+            <div className="text-slate-800 font-medium">{driver.idDocument}</div>
             <div className="text-slate-400 text-[11px]">
-              DL: <span className="font-mono text-slate-600">{driver.drivingLicenseNumber}</span>
+              DL: <span className="font-mono font-medium text-slate-600">{driver.drivingLicenseNumber}</span>
             </div>
           </div>
         </div>
@@ -82,7 +102,7 @@ export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
     },
     {
       key: 'status',
-      header: 'Verification Status',
+      header: 'License Approval Status',
       className: 'whitespace-nowrap',
       render: (driver) => <Badge status={driver.verificationStatus} />
     },
@@ -93,8 +113,16 @@ export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
       className: 'whitespace-nowrap text-right',
       headerClassName: 'text-right',
       render: (driver) => (
-        <div className="flex items-center gap-1.5 justify-end">
-          {driver.verificationStatus === 'pending' ? (
+        <div className="flex items-center gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => handleViewDetails(driver)}
+            className="flex items-center justify-center rounded-xl p-2 bg-indigo-50 border border-indigo-200/80 text-indigo-600 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all cursor-pointer shadow-2xs"
+            title="View Driver Details & KYC"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          {/* {driver.verificationStatus === 'pending' ? (
             <>
               <button
                 onClick={() => onVerify(driver.id, 'verified')}
@@ -123,7 +151,7 @@ export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
             >
               {driver.verificationStatus === 'verified' ? 'Re-audit KYC' : 'Re-verify'}
             </button>
-          )}
+          )} */}
         </div>
       )
     }
@@ -180,6 +208,7 @@ export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
           data={drivers}
           columns={columns}
           keyExtractor={(driver) => driver.id}
+          onRowClick={(driver) => handleViewDetails(driver)}
           emptyMessage="No drivers registered"
           emptySubtext="New driver applications will appear here for verification."
           emptyIcon={ShieldCheck}
@@ -238,18 +267,26 @@ export const DriverVerificationList: React.FC<DriverVerificationListProps> = ({
                 </div>
 
                 {/* KYC & License Info */}
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2">
                   <FileText className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <div>
-                    <div className="text-slate-700 font-mono text-[11px]">{driver.idDocument}</div>
-                    <div className="text-slate-400 text-[11px]">
-                      DL: <span className="font-mono text-slate-600">{driver.drivingLicenseNumber}</span>
+                  <div className="text-xs">
+                    <div className="text-slate-800 font-medium">{driver.idDocument}</div>
+                    <div className="text-slate-500 text-[11px]">
+                      DL: <span className="font-mono font-medium text-slate-700">{driver.drivingLicenseNumber}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Approvals Action */}
                 <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleViewDetails(driver)}
+                    className="flex items-center gap-1.5 rounded-xl border border-indigo-200/80 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white hover:border-indigo-600 px-3 py-1.5 text-xs font-medium transition-all cursor-pointer shadow-2xs"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>View Details</span>
+                  </button>
                   {driver.verificationStatus === 'pending' ? (
                     <>
                       <button

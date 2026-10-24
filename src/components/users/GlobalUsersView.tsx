@@ -16,6 +16,7 @@ import {
   Music,
   MapPin,
   Sparkles,
+  Compass,
   Phone,
   Mail,
   Eye,
@@ -359,21 +360,21 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
         </div>
       )
     },
-    {
-      key: 'activity',
-      header: 'Activity',
-      className: 'whitespace-nowrap',
-      render: (user) => (
-        <div>
-          <div className="font-semibold text-slate-800">
-            {user.totalActivities} Activities
-          </div>
-          <div className="text-[11px] text-slate-400">
-            {user.totalSpentOrEarned}
-          </div>
-        </div>
-      )
-    },
+    // {
+    //   key: 'activity',
+    //   header: 'Activity',
+    //   className: 'whitespace-nowrap',
+    //   render: (user) => (
+    //     <div>
+    //       <div className="font-semibold text-slate-800">
+    //         {user.totalActivities} Activities
+    //       </div>
+    //       <div className="text-[11px] text-slate-400">
+    //         {user.totalSpentOrEarned}
+    //       </div>
+    //     </div>
+    //   )
+    // },
     {
       key: 'actions',
       header: 'Actions',
@@ -389,7 +390,7 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
           >
             <Eye className="h-4 w-4" />
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={(e) => handleToggleStatus(user.id, e)}
             className={`rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${user.status === 'active'
@@ -398,11 +399,11 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
               }`}
           >
             {user.status === 'active' ? 'Suspend' : 'Activate'}
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={(e) => handleDeleteUser(user.id, e)}
-            className="rounded-lg p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+            className="rounded-lg p-1.5 bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white hover:border-rose-600 shadow-2xs transition-all cursor-pointer"
             title="Remove User"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -491,70 +492,12 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
         </div>
       </div>
 
-      {/* 3. Module Filter Navigation Pills */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <button
-          type="button"
-          onClick={() => { setSelectedModule('all'); setCurrentPage(1); }}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${selectedModule === 'all'
-            ? 'bg-indigo-600 text-white shadow-2xs'
-            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/90 shadow-2xs'
-            }`}
-        >
-          All Modules ({users.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => { setSelectedModule('carpooling'); setCurrentPage(1); }}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${selectedModule === 'carpooling'
-            ? 'bg-emerald-600 text-white shadow-2xs'
-            : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80 shadow-2xs'
-            }`}
-        >
-          <Car className="h-3 w-3" />
-          <span>Carpooling</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => { setSelectedModule('concerts'); setCurrentPage(1); }}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${selectedModule === 'concerts'
-            ? 'bg-purple-600 text-white shadow-2xs'
-            : 'bg-white text-purple-700 hover:bg-purple-50 border border-purple-200/80 shadow-2xs'
-            }`}
-        >
-          <Music className="h-3 w-3" />
-          <span>Concerts</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => { setSelectedModule('trips'); setCurrentPage(1); }}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${selectedModule === 'trips'
-            ? 'bg-amber-600 text-white shadow-2xs'
-            : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200/80 shadow-2xs'
-            }`}
-        >
-          <MapPin className="h-3 w-3" />
-          <span>Trips</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => { setSelectedModule('stranger-meets'); setCurrentPage(1); }}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${selectedModule === 'stranger-meets'
-            ? 'bg-sky-600 text-white shadow-2xs'
-            : 'bg-white text-sky-700 hover:bg-sky-50 border border-sky-200/80 shadow-2xs'
-            }`}
-        >
-          <Sparkles className="h-3 w-3" />
-          <span>Stranger Meets</span>
-        </button>
-      </div>
-
-      {/* 4. Unified Attached Card: Header, Controls & Table / Grid */}
+      {/* 3. Unified Attached Card: Header, Controls & Table / Grid */}
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
         {/* Card Header: Search & Filter Controls */}
-        <div className="px-4 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
+        <div className="px-4 py-4 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white">
           {/* Search Input Bar (Left Side) */}
-          <div className="relative w-full sm:w-80">
+          <div className="relative w-full xl:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
             <input
               type="text"
@@ -581,9 +524,30 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
             )}
           </div>
 
-          {/* Right Controls: Role Filter Dropdown & View Mode Switcher */}
-          <div className="flex items-center gap-2">
+          {/* Right Controls: Module, Role & Status Filter Dropdowns + View Mode Switcher */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Module Filter Dropdown */}
             <div className="relative inline-flex items-center">
+              <Compass className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <select
+                value={selectedModule}
+                onChange={(e) => {
+                  setSelectedModule(e.target.value as ModuleFilter);
+                  setCurrentPage(1);
+                }}
+                className="appearance-none h-10 rounded-lg border border-slate-200 bg-slate-50/70 pl-9 pr-9 py-2 text-xs sm:text-[13px] font-medium text-slate-700 outline-none transition-all hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 cursor-pointer shadow-2xs"
+              >
+                <option value="all">All Modules ({users.length})</option>
+                <option value="carpooling">Carpooling</option>
+                <option value="concerts">Concerts</option>
+                <option value="trips">Trips</option>
+                <option value="stranger-meets">Stranger Meets</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div>
+
+            {/* Role Filter Dropdown */}
+            {/* <div className="relative inline-flex items-center">
               <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
               <select
                 value={selectedRole}
@@ -602,7 +566,26 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
                 <option value="multi_role">Multi-Role</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
-            </div>
+            </div> */}
+
+            {/* Status / KYC Filter Dropdown */}
+            {/* <div className="relative inline-flex items-center">
+              <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+              <select
+                value={selectedKyc}
+                onChange={(e) => {
+                  setSelectedKyc(e.target.value as KycFilter);
+                  setCurrentPage(1);
+                }}
+                className="appearance-none h-10 rounded-lg border border-slate-200 bg-slate-50/70 pl-9 pr-9 py-2 text-xs sm:text-[13px] font-medium text-slate-700 outline-none transition-all hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 cursor-pointer shadow-2xs"
+              >
+                <option value="all">All KYC Statuses</option>
+                <option value="verified">KYC Verified</option>
+                <option value="pending">KYC Pending Review ({pendingKycCount})</option>
+                <option value="unverified">KYC Unverified</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+            </div> */}
 
             {/* View Mode Toggle */}
             <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50/80 p-0.5 h-10 items-center">
@@ -637,7 +620,7 @@ export const GlobalUsersView: React.FC<GlobalUsersViewProps> = ({ onShowToast })
             emptyMessage="No users match your criteria"
             emptySubtext="Try adjusting your search query, module filter, or KYC review status."
             emptyIcon={Users}
-            onRowClick={(user) => navigate(`/users/${user.id}`)}
+            // onRowClick={(user) => navigate(`/users/${user.id}`)}
             containerClassName="border-0 rounded-none shadow-none"
             hoverClassName="hover:bg-slate-50/80"
             pagination={{

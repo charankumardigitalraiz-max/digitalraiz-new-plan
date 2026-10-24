@@ -166,7 +166,7 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
             <h1 className="text-xl sm:text-[22px] font-semibold tracking-tight text-slate-900">
               Carpool Network
             </h1>
-            {liveCardCount && (
+            {/* {liveCardCount && (
               <span className="rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
                 {liveCardCount.totalRides} Live Ride{liveCardCount.totalRides === 1 ? '' : 's'}
               </span>
@@ -176,7 +176,7 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
                 <Loader2 className="h-3 w-3 animate-spin" />
                 Updating...
               </span>
-            )}
+            )} */}
           </div>
           <p className="text-[13px] font-normal text-slate-500 mt-0.5 max-w-2xl">
             Manage long-distance intercity rides, drivers, seat occupancy & pricing with real-time dynamic query filters.
@@ -196,7 +196,7 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
       {/* Metric Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          label="Total Bookings"
+          label="Total Carpools"
           value={totalRidesCount}
           isPositive={true}
           icon={Users}
@@ -211,13 +211,13 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
         />
 
         <MetricCard
-          label="Completed"
+          label="Completed Carpools"
           value={completedRidesCount}
           icon={TrendingUp}
           accentColor="indigo"
         />
         <MetricCard
-          label="Cancelled"
+          label="Cancelled Carpools"
           value={cancelledRidesCount}
           isPositive={true}
           icon={RouteIcon}
@@ -226,7 +226,7 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
       </div>
 
       {/* Interactive Status Pill Filter Bar (Sends dynamic query on click) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+      {/* <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
         <button
           type="button"
           onClick={() => handleStatusFilterChange('all')}
@@ -291,7 +291,7 @@ export const CarpoolDashboard: React.FC<CarpoolDashboardProps> = ({
           <span>Cancelled:</span>
           <strong className="font-semibold">{cancelledRidesCount}</strong>
         </button>
-      </div>
+      </div> */}
 
       {/* Unified Attached Card: Header, Controls & Table */}
       <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">

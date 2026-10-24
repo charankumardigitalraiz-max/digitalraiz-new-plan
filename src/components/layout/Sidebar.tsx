@@ -115,9 +115,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           id: 'verifications',
           label: 'Driver KYC',
-          badge: pendingDriverCount > 0 ? `${pendingDriverCount} pending` : undefined,
+          // badge: pendingDriverCount > 0 ? `${pendingDriverCount} pending` : undefined,
           isPendingBadge: pendingDriverCount > 0
-        }
+        },
+        { id: 'settings', label: 'Carpool Settings' }
       ]
     },
     {
@@ -258,11 +259,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                  {item.badge !== undefined && !isExpanded && (
+                  {/* {item.badge !== undefined && !isExpanded && (
                     <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-normal bg-slate-100 text-slate-600">
                       {item.badge}
                     </span>
-                  )}
+                  )} */}
                   {item.subItems && item.subItems.length > 0 && (
                     <span
                       onClick={(e) => toggleTab(item.id, e)}

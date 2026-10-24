@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   Users,
@@ -53,14 +53,28 @@ type BookingModuleFilter = 'all' | 'carpool' | 'concerts' | 'trips' | 'meets';
 
 export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onShowToast }) => {
   const { userId } = useParams<{ userId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // Find user from mock dataset or default to first
   const [currentUser, setCurrentUser] = useState<GlobalUser | undefined>(() => {
-    return mockGlobalUsers.find(u => u.id === userId) || mockGlobalUsers[0];
+    return (
+      mockGlobalUsers.find(
+        u =>
+          u.id === userId ||
+          u.id === userId?.replace('drv-0', 'usr-00').replace('drv-', 'usr-') ||
+          u.email.toLowerCase() === userId?.toLowerCase()
+      ) || mockGlobalUsers[0]
+    );
   });
 
-  const [activeTab, setActiveTab] = useState<DetailTab>('bookings');
+  const tabParam = searchParams.get('tab') as DetailTab | null;
+  const [activeTab, setActiveTab] = useState<DetailTab>(() => {
+    if (tabParam && ['bookings', 'kyc', 'financials', 'reviews'].includes(tabParam)) {
+      return tabParam;
+    }
+    return 'bookings';
+  });
   const [bookingFilter, setBookingFilter] = useState<BookingModuleFilter>('all');
   const [bookingSearchQuery, setBookingSearchQuery] = useState('');
   const [bookingPage, setBookingPage] = useState(1);
@@ -611,9 +625,8 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       width: '140px',
       render: (item) => (
         <span
-          className={`font-bold text-xs ${
-            item.isCredit ? 'text-emerald-700' : 'text-slate-900'
-          }`}
+          className={`font-bold text-xs ${item.isCredit ? 'text-emerald-700' : 'text-slate-900'
+            }`}
         >
           {item.amount}
         </span>
@@ -657,7 +670,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       <div className="rounded-xl border border-slate-200/90 bg-white px-4 py-3 sm:px-5 sm:py-3.5 shadow-2xs flex items-center justify-between gap-3">
         <button
           type="button"
-          onClick={() => navigate('/users')}
+          onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-indigo-600 shadow-2xs transition-all cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

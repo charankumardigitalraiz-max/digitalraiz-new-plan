@@ -884,7 +884,7 @@ export const EcosystemCharts = ({
                   onClick={() => setModuleFilter(moduleFilter === seg.id ? 'all' : (seg.id as ModuleFilter))}
                   onMouseEnter={() => setHoveredSegment(seg.id)}
                   onMouseLeave={() => setHoveredSegment(null)}
-                  className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 rounded-lg p-1.5 text-center sm:text-left transition-all cursor-pointer ${isHovered
+                  className={`flex flex-col bg-slate-100 text-slate-900 sm:flex-row items-center justify-center gap-1.5 rounded-lg p-1.5 text-center sm:text-left transition-all cursor-pointer ${isHovered
                     ? 'bg-slate-100 text-slate-900 shadow-2xs'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}

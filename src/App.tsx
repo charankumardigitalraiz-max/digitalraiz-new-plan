@@ -26,6 +26,7 @@ import { CarpoolDashboard } from './components/carpool/CarpoolDashboard';
 import { CarpoolOverview } from './components/carpool/CarpoolOverview';
 import { DriverVerificationScreen } from './components/carpool/DriverVerificationScreen';
 import { RideDetailScreen } from './components/carpool/RideDetailScreen';
+import { CarpoolSettings } from './components/carpool/CarpoolSettings';
 import { CreateRideModal } from './components/carpool/CreateRideModal';
 import { ConcertsDashboard } from './components/concerts/ConcertsDashboard';
 import { ConcertDetailModal } from './components/concerts/ConcertDetailModal';
@@ -84,7 +85,7 @@ export function App() {
           setCarpoolPagination(res.pagination);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   // Fetch real carpool rides from backend on mount
@@ -376,7 +377,6 @@ export function App() {
                   rides={rides}
                   cardCount={carpoolCardCount}
                   pagination={carpoolPagination}
-                  onPageChange={(p) => fetchCarpoolRides(p)}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   onSelectRide={(ride) => navigate(`/carpooling/rides/${ride.id}`)}
@@ -403,6 +403,15 @@ export function App() {
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   onVerifyDriver={(id, status) => handleVerifyDriver(id, status)}
+                  onViewDriverDetails={(driver) => navigate(`/users/${driver.id}?tab=kyc`)}
+                />
+              }
+            />
+            <Route
+              path="/carpooling/settings"
+              element={
+                <CarpoolSettings
+                  onShowToast={(msg) => showToast(msg)}
                 />
               }
             />
