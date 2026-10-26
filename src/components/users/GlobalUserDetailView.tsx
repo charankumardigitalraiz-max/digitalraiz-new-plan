@@ -184,7 +184,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
           </p>
           <button
             onClick={() => navigate('/users')}
-            className="mt-2 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-500 cursor-pointer transition-all"
+            className="mt-2 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-500 cursor-pointer transition-all"
           >
             Return to Customers
           </button>
@@ -338,19 +338,19 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       destination: destStr,
       date: departure && !isNaN(departure.getTime())
         ? new Intl.DateTimeFormat('en-IN', {
-            timeZone: 'Asia/Kolkata',
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          }).format(departure)
+          timeZone: 'Asia/Kolkata',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }).format(departure)
         : (ride.departureDate || 'Scheduled'),
       time: departure && !isNaN(departure.getTime())
         ? new Intl.DateTimeFormat('en-IN', {
-            timeZone: 'Asia/Kolkata',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          }).format(departure)
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }).format(departure)
         : 'Flexible',
       role: 'Driver / Publisher',
       seats: seatsInfo,
@@ -374,19 +374,19 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       destination: destStr,
       date: bkDate && !isNaN(bkDate.getTime())
         ? new Intl.DateTimeFormat('en-IN', {
-            timeZone: 'Asia/Kolkata',
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          }).format(bkDate)
+          timeZone: 'Asia/Kolkata',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        }).format(bkDate)
         : 'Recent',
       time: bkDate && !isNaN(bkDate.getTime())
         ? new Intl.DateTimeFormat('en-IN', {
-            timeZone: 'Asia/Kolkata',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          }).format(bkDate)
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }).format(bkDate)
         : 'Booked',
       role: 'Passenger',
       seats: `${seatsCount} Seat${seatsCount > 1 ? 's' : ''}`,
@@ -445,26 +445,23 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
         return (
           <div className="flex items-center gap-2.5">
             <div
-              className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border ${
-                isDriver
+              className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border ${isDriver
                   ? 'bg-emerald-100 text-emerald-700 border-emerald-300 shadow-2xs'
                   : 'bg-indigo-100 text-indigo-700 border-indigo-300 shadow-2xs'
-              }`}
+                }`}
             >
               {isDriver ? <Car className="h-4 w-4" /> : <Ticket className="h-4 w-4" />}
             </div>
             <div className="min-w-0">
               <span
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-2xs ${
-                  isDriver
+                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border shadow-2xs ${isDriver
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                     : 'bg-indigo-50 text-indigo-800 border-indigo-300'
-                }`}
+                  }`}
               >
                 <span
-                  className={`h-1.5 w-1.5 rounded-full shrink-0 ${
-                    isDriver ? 'bg-emerald-600' : 'bg-indigo-600'
-                  }`}
+                  className={`h-1.5 w-1.5 rounded-full shrink-0 ${isDriver ? 'bg-emerald-600' : 'bg-indigo-600'
+                    }`}
                 />
                 {isDriver ? 'Published' : 'Booking'}
               </span>
@@ -528,7 +525,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       header: 'Fare / Amount',
       width: '120px',
       render: (item) => (
-        <span className="font-bold text-slate-900 text-xs">
+        <span className="font-semibold text-slate-900 text-xs">
           {item.amount}
         </span>
       )
@@ -546,8 +543,8 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
         return (
           <span
             className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${isUpcoming
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
-                : 'bg-slate-100 text-slate-600 border border-slate-200/80'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
+              : 'bg-slate-100 text-slate-600 border border-slate-200/80'
               }`}
           >
             {item.status}
@@ -632,7 +629,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
       width: '140px',
       render: (item) => (
         <span
-          className={`font-bold text-xs ${item.isCredit ? 'text-emerald-700' : 'text-slate-900'
+          className={`font-semibold text-xs ${item.isCredit ? 'text-emerald-700' : 'text-slate-900'
             }`}
         >
           {item.amount}
@@ -678,7 +675,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-indigo-600 shadow-2xs transition-all cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-indigo-600 shadow-2xs transition-all cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Back to Customers</span>
@@ -718,7 +715,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
             <div className="space-y-3">
               {/* Name, ID, Status Badges */}
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-900">
                   {currentUser.name}
                 </h1>
                 <span className="font-mono text-[11px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200/80">
@@ -795,7 +792,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
             <button
               type="button"
               onClick={() => setIsEditingProfile(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer"
             >
               <Edit3 className="h-3.5 w-3.5 text-slate-500" />
               <span>Edit Profile</span>
@@ -805,7 +802,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
               <button
                 type="button"
                 onClick={() => handleUpdateKyc(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs transition-all cursor-pointer"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>Approve KYC</span>
@@ -815,7 +812,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
             <button
               type="button"
               onClick={handleToggleStatus}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all cursor-pointer ${currentUser.status === 'active'
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all cursor-pointer ${currentUser.status === 'active'
                 ? 'bg-slate-100 text-slate-700 hover:bg-amber-50 hover:text-amber-800 border border-slate-200'
                 : 'bg-emerald-600 text-white hover:bg-emerald-500'
                 }`}
@@ -827,7 +824,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
             <button
               type="button"
               onClick={handleDeleteAccount}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-600 hover:text-white px-2.5 py-1.5 text-xs font-semibold text-rose-700 shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 border border-rose-200 hover:bg-rose-600 hover:text-white px-2.5 py-1.5 text-xs font-semibold text-rose-700 shadow-2xs transition-all cursor-pointer"
               title="Delete Account Permanently"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -1037,7 +1034,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
               <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-semibold">
                       <ShieldCheck className="h-4 w-4" />
                     </div>
                     <div>
@@ -1083,7 +1080,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                     <button
                       type="button"
                       onClick={() => handleUpdateKyc(true)}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white py-2 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white py-2 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Approve & Verify KYC</span>
@@ -1092,7 +1089,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                     <button
                       type="button"
                       onClick={() => handleUpdateKyc(false)}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
                     >
                       <span>Revoke KYC</span>
                     </button>
@@ -1100,7 +1097,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   <button
                     type="button"
                     onClick={() => setIsEditingKyc(true)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
                   >
                     <Edit3 className="h-3.5 w-3.5 text-slate-500" />
                     <span>Update KYC Info</span>
@@ -1112,7 +1109,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
               <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                    <div className="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold">
                       <Car className="h-4 w-4" />
                     </div>
                     <div>
@@ -1138,7 +1135,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">License Plate</span>
-                    <span className="font-mono font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <span className="font-mono font-semibold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
                       {currentUser.vehicleDetails ? currentUser.vehicleDetails.plate : 'Not available'}
                     </span>
                   </div>
@@ -1152,7 +1149,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   <button
                     type="button"
                     onClick={() => onShowToast?.('Driving license scanned copy verified.')}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <Eye className="h-3.5 w-3.5 text-slate-400" />
                     <span>Audit License Scan</span>
@@ -1173,7 +1170,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 <button
                   type="button"
                   onClick={() => onShowToast?.('Exporting financial ledger as CSV.')}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer self-start sm:self-auto"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-2xs transition-all cursor-pointer self-start sm:self-auto"
                 >
                   <Download className="h-3.5 w-3.5 text-slate-500" />
                   <span>Download Tax Statement</span>
@@ -1215,7 +1212,7 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 </div>
                 <div className="flex items-center gap-1.5 text-amber-500 bg-amber-50 px-3 py-1 rounded-full border border-amber-200/80">
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-bold text-slate-900">{currentUser.rating.toFixed(2)}</span>
+                  <span className="text-sm font-semibold text-slate-900">{currentUser.rating.toFixed(2)}</span>
                   <span className="text-xs text-slate-400 font-normal">/ 5.0 Rating</span>
                 </div>
               </div>
@@ -1281,13 +1278,13 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                 <button
                   type="button"
                   onClick={() => setShowNotificationModal(false)}
-                  className="rounded-lg px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
+                  className="rounded-md px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-500 transition-all cursor-pointer"
+                  className="rounded-md bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-500 transition-all cursor-pointer"
                 >
                   Send Transmission
                 </button>
@@ -1376,14 +1373,14 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   type="button"
                   onClick={() => setIsEditingProfile(false)}
                   disabled={isSubmittingProfile}
-                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
+                  className="rounded-md border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingProfile}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingProfile && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   <span>{isSubmittingProfile ? 'Saving...' : 'Save Changes'}</span>
@@ -1468,14 +1465,14 @@ export const GlobalUserDetailView: React.FC<GlobalUserDetailViewProps> = ({ onSh
                   type="button"
                   onClick={() => setIsEditingKyc(false)}
                   disabled={isSubmittingKyc}
-                  className="rounded-xl border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
+                  className="rounded-md border border-slate-200 px-3.5 py-2 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingKyc}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 font-semibold shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingKyc && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   <span>{isSubmittingKyc ? 'Updating...' : 'Update KYC Record'}</span>

@@ -6,14 +6,18 @@ import type {
   ConcertEvent,
   TripPlan,
   Driver,
-  StrangerMeet
+  StrangerMeet,
+  Venue,
+  Artist
 } from './types';
 import {
   mockCarpoolRides,
   mockConcerts,
   mockTrips,
   mockDrivers,
-  mockStrangerMeets
+  mockStrangerMeets,
+  mockVenues,
+  mockArtists
 } from './data/mockData';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
@@ -26,9 +30,13 @@ import { DriverVerificationScreen } from './components/carpool/DriverVerificatio
 import { RideDetailScreen } from './components/carpool/RideDetailScreen';
 import { CarpoolSettings } from './components/carpool/CarpoolSettings';
 import { CreateRideModal } from './components/carpool/CreateRideModal';
-import { ConcertsDashboard } from './components/concerts/ConcertsDashboard';
+import { ConcertsDashboard } from './components/concerts/ConcertsList';
+import { ConcertsOverview } from './components/concerts/ConcertsOverview';
 import { ConcertDetailModal } from './components/concerts/ConcertDetailModal';
+import { ConcertDetailScreen } from './components/concerts/ConcertDetailScreen';
 import { UploadConcertModal } from './components/concerts/UploadConcertModal';
+import { VenuesView } from './components/concerts/VenuesView';
+import { ArtistsView } from './components/concerts/ArtistsView';
 import { TripPlannerDashboard } from './components/trips/TripPlannerDashboard';
 import { TripDetailModal } from './components/trips/TripDetailModal';
 import { CreateTripModal } from './components/trips/CreateTripModal';
@@ -194,6 +202,26 @@ export function App() {
   const handleUpdateConcertStatus = (id: string, status: 'active' | 'upcoming' | 'completed' | 'cancelled') => {
     setConcerts(concerts.map(c => c.id === id ? { ...c, status } : c));
     showToast(`Event status updated to ${status}.`);
+  };
+
+  // Venues & Artists State
+  const [venues, setVenues] = useState<Venue[]>(mockVenues);
+  const [artists, setArtists] = useState<Artist[]>(mockArtists);
+
+  const handleAddVenue = (newVenue: Venue) => {
+    setVenues([newVenue, ...venues]);
+  };
+
+  const handleAddArtist = (newArtistData: Omit<Artist, 'id'>) => {
+    const created: Artist = {
+      ...newArtistData,
+      id: `art-${Date.now().toString().slice(-4)}`
+    };
+    setArtists([created, ...artists]);
+  };
+
+  const handleDeleteArtist = (artistId: string) => {
+    setArtists(artists.filter(a => a.id !== artistId));
   };
 
   // Trip Handlers
@@ -422,16 +450,28 @@ export function App() {
             <Route path="/drivers" element={<Navigate to="/carpooling/verifications" replace />} />
 
             {/* Concerts & Events Module */}
-            <Route path="/concerts" element={<Navigate to="/concerts/all-concerts" replace />} />
+            <Route path="/concerts" element={<Navigate to="/concerts/overview" replace />} />
+            <Route
+              path="/concerts/overview"
+              element={
+                <ConcertsOverview
+                  concerts={concerts}
+                  onNavigateSubTab={(sub) => navigate(`/concerts/${sub}`)}
+                  onSelectConcert={(concert) => navigate(`/concerts/${concert.id}`)}
+                  onOpenUploadModal={() => setIsUploadConcertOpen(true)}
+                />
+              }
+            />
             <Route
               path="/concerts/all-concerts"
               element={
                 <ConcertsDashboard
                   concerts={concerts}
                   searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
                   activeSubTab="all-concerts"
-                  onSubTabChange={(sub) => navigate(`/concerts/${sub}`)}
-                  onSelectConcert={setSelectedConcert}
+                  onSubTabChange={(sub: string) => navigate(`/concerts/${sub}`)}
+                  onSelectConcert={(concert) => navigate(`/concerts/${concert.id}`)}
                   onDeleteConcert={handleDeleteConcert}
                   onOpenUploadModal={() => setIsUploadConcertOpen(true)}
                 />
@@ -440,14 +480,41 @@ export function App() {
             <Route
               path="/concerts/venues"
               element={
-                <ConcertsDashboard
+                <VenuesView
+                  venues={venues}
+                  onAddVenue={handleAddVenue}
+                  onShowToast={(msg) => showToast(msg)}
+                />
+              }
+            />
+            <Route
+              path="/concerts/artists"
+              element={
+                <ArtistsView
+                  artists={artists}
+                  onAddArtist={handleAddArtist}
+                  onDeleteArtist={handleDeleteArtist}
+                  onShowToast={(msg) => showToast(msg)}
+                />
+              }
+            />
+            <Route
+              path="/concerts/:concertId"
+              element={
+                <ConcertDetailScreen
                   concerts={concerts}
-                  searchQuery={searchQuery}
-                  activeSubTab="venues"
-                  onSubTabChange={(sub) => navigate(`/concerts/${sub}`)}
-                  onSelectConcert={setSelectedConcert}
+                  onStatusChange={handleUpdateConcertStatus}
                   onDeleteConcert={handleDeleteConcert}
-                  onOpenUploadModal={() => setIsUploadConcertOpen(true)}
+                />
+              }
+            />
+            <Route
+              path="/concerts/all-concerts/:concertId"
+              element={
+                <ConcertDetailScreen
+                  concerts={concerts}
+                  onStatusChange={handleUpdateConcertStatus}
+                  onDeleteConcert={handleDeleteConcert}
                 />
               }
             />

@@ -2,8 +2,55 @@
 
 @theme {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Global Sidebar & Navigation Tokens */
   --color-sidebar-active: #EEF2FF;
   --color-sidebar-active-text: #4F46E5;
+
+  /* 1. Carpooling Module Tokens (Indigo Theme) */
+  --color-carpool-primary: #4F46E5;
+  --color-carpool-primary-hover: #4338CA;
+  --color-carpool-secondary: #EEF2FF;
+  --color-carpool-secondary-text: #4F46E5;
+  --color-carpool-border: #C7D2FE;
+  --color-carpool-btn: #4F46E5;
+  --color-carpool-btn-hover: #4338CA;
+
+  /* 2. Concerts & Events Module Tokens (Purple Theme) */
+  --color-concerts-primary: #9333EA;
+  --color-concerts-primary-hover: #7E22CE;
+  --color-concerts-secondary: #FAF5FF;
+  --color-concerts-secondary-text: #7E22CE;
+  --color-concerts-border: #E9D5FF;
+  --color-concerts-btn: #9333EA;
+  --color-concerts-btn-hover: #7E22CE;
+
+  /* 3. Trip Planner Module Tokens (Amber / Orange Theme) */
+  --color-trips-primary: #D97706;
+  --color-trips-primary-hover: #B45309;
+  --color-trips-secondary: #FFFBEB;
+  --color-trips-secondary-text: #B45309;
+  --color-trips-border: #FDE68A;
+  --color-trips-btn: #D97706;
+  --color-trips-btn-hover: #B45309;
+
+  /* 4. Stranger Meets Module Tokens (Teal Theme) */
+  --color-meets-primary: #0D9488;
+  --color-meets-primary-hover: #0F766E;
+  --color-meets-secondary: #F0FDFA;
+  --color-meets-secondary-text: #0F766E;
+  --color-meets-border: #99F6E4;
+  --color-meets-btn: #0D9488;
+  --color-meets-btn-hover: #0F766E;
+
+  /* 5. Users & Operations Module Tokens (Blue Theme) */
+  --color-users-primary: #2563EB;
+  --color-users-primary-hover: #1D4ED8;
+  --color-users-secondary: #EFF6FF;
+  --color-users-secondary-text: #1D4ED8;
+  --color-users-border: #BFDBFE;
+  --color-users-btn: #2563EB;
+  --color-users-btn-hover: #1D4ED8;
 }
 
 @layer base {
@@ -11,6 +58,51 @@
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --sidebar-active-bg: #EEF2FF;
     --sidebar-active-text: #4F46E5;
+
+    /* Carpool Module CSS Variables */
+    --carpool-primary: #4F46E5;
+    --carpool-primary-hover: #4338CA;
+    --carpool-secondary: #EEF2FF;
+    --carpool-secondary-text: #4F46E5;
+    --carpool-border: #C7D2FE;
+    --carpool-btn-bg: #4F46E5;
+    --carpool-btn-hover: #4338CA;
+
+    /* Concerts Module CSS Variables */
+    --concerts-primary: #9333EA;
+    --concerts-primary-hover: #7E22CE;
+    --concerts-secondary: #FAF5FF;
+    --concerts-secondary-text: #7E22CE;
+    --concerts-border: #E9D5FF;
+    --concerts-btn-bg: #9333EA;
+    --concerts-btn-hover: #7E22CE;
+
+    /* Trips Module CSS Variables */
+    --trips-primary: #D97706;
+    --trips-primary-hover: #B45309;
+    --trips-secondary: #FFFBEB;
+    --trips-secondary-text: #B45309;
+    --trips-border: #FDE68A;
+    --trips-btn-bg: #D97706;
+    --trips-btn-hover: #B45309;
+
+    /* Stranger Meets CSS Variables */
+    --meets-primary: #0D9488;
+    --meets-primary-hover: #0F766E;
+    --meets-secondary: #F0FDFA;
+    --meets-secondary-text: #0F766E;
+    --meets-border: #99F6E4;
+    --meets-btn-bg: #0D9488;
+    --meets-btn-hover: #0F766E;
+
+    /* Users & System CSS Variables */
+    --users-primary: #2563EB;
+    --users-primary-hover: #1D4ED8;
+    --users-secondary: #EFF6FF;
+    --users-secondary-text: #1D4ED8;
+    --users-border: #BFDBFE;
+    --users-btn-bg: #2563EB;
+    --users-btn-hover: #1D4ED8;
   }
 
   * {
@@ -25,8 +117,9 @@
   }
 }
 
-
-/* Global design tokens for active and hover states */
+/* ============================================================
+   GLOBAL ACTIVE & SIDEBAR STATES
+   ============================================================ */
 .bg-sidebar-active {
   background-color: var(--sidebar-active-bg, #EEF2FF);
 }
@@ -44,7 +137,165 @@
   background-color: var(--sidebar-active-bg, #EEF2FF);
 }
 
-/* Custom sleek scrollbar for light theme */
+/* ============================================================
+   MODULE 1: CARPOOLING BUTTONS & UTILITIES
+   ============================================================ */
+.bg-carpool-btn {
+  background-color: var(--carpool-btn-bg, #4F46E5);
+}
+
+.hover\:bg-carpool-btn:hover {
+  background-color: var(--carpool-btn-hover, #4338CA);
+}
+
+.btn-carpool {
+  background-color: var(--carpool-btn-bg, #4F46E5);
+  color: #FFFFFF;
+}
+
+.btn-carpool:hover {
+  background-color: var(--carpool-btn-hover, #4338CA);
+}
+
+.bg-carpool-primary {
+  background-color: var(--carpool-primary, #4F46E5);
+}
+
+.bg-carpool-secondary {
+  background-color: var(--carpool-secondary, #EEF2FF);
+}
+
+.text-carpool-primary {
+  color: var(--carpool-primary, #4F46E5);
+}
+
+.text-carpool-secondary {
+  color: var(--carpool-secondary-text, #4F46E5);
+}
+
+/* ============================================================
+   MODULE 2: CONCERTS BUTTONS & UTILITIES
+   ============================================================ */
+.bg-concerts-btn {
+  background-color: var(--concerts-btn-bg, #9333EA);
+}
+
+.hover\:bg-concerts-btn:hover {
+  background-color: var(--concerts-btn-hover, #7E22CE);
+}
+
+.btn-concerts {
+  background-color: var(--concerts-btn-bg, #9333EA);
+  color: #FFFFFF;
+}
+
+.btn-concerts:hover {
+  background-color: var(--concerts-btn-hover, #7E22CE);
+}
+
+.bg-concerts-primary {
+  background-color: var(--concerts-primary, #9333EA);
+}
+
+.bg-concerts-secondary {
+  background-color: var(--concerts-secondary, #FAF5FF);
+}
+
+.text-concerts-primary {
+  color: var(--concerts-primary, #9333EA);
+}
+
+.text-concerts-secondary {
+  color: var(--concerts-secondary-text, #7E22CE);
+}
+
+.border-concerts-secondary {
+  border-color: var(--concerts-border, #E9D5FF);
+}
+
+/* ============================================================
+   MODULE 3: TRIPS BUTTONS & UTILITIES
+   ============================================================ */
+.btn-trips {
+  background-color: var(--trips-btn-bg, #D97706);
+  color: #FFFFFF;
+}
+
+.btn-trips:hover {
+  background-color: var(--trips-btn-hover, #B45309);
+}
+
+.bg-trips-primary {
+  background-color: var(--trips-primary, #D97706);
+}
+
+.bg-trips-secondary {
+  background-color: var(--trips-secondary, #FFFBEB);
+}
+
+.text-trips-primary {
+  color: var(--trips-primary, #D97706);
+}
+
+.text-trips-secondary {
+  color: var(--trips-secondary-text, #B45309);
+}
+
+/* ============================================================
+   MODULE 4: STRANGER MEETS BUTTONS & UTILITIES
+   ============================================================ */
+.btn-meets {
+  background-color: var(--meets-btn-bg, #0D9488);
+  color: #FFFFFF;
+}
+
+.btn-meets:hover {
+  background-color: var(--meets-btn-hover, #0F766E);
+}
+
+.bg-meets-primary {
+  background-color: var(--meets-primary, #0D9488);
+}
+
+.bg-meets-secondary {
+  background-color: var(--meets-secondary, #F0FDFA);
+}
+
+.text-meets-primary {
+  color: var(--meets-primary, #0D9488);
+}
+
+.text-meets-secondary {
+  color: var(--meets-secondary-text, #0F766E);
+}
+
+/* ============================================================
+   MODULE 5: USERS & SYSTEM BUTTONS & UTILITIES
+   ============================================================ */
+.btn-users {
+  background-color: var(--users-btn-bg, #2563EB);
+  color: #FFFFFF;
+}
+
+.btn-users:hover {
+  background-color: var(--users-btn-hover, #1D4ED8);
+}
+
+.bg-users-primary {
+  background-color: var(--users-primary, #2563EB);
+}
+
+.bg-users-secondary {
+  background-color: var(--users-secondary, #EFF6FF);
+}
+
+.text-users-primary {
+  color: var(--users-primary, #2563EB);
+}
+
+/* ============================================================
+   SHARED SLEEK SCROLLBAR & GLASSMORPHISM
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -63,7 +314,6 @@
   background: #94a3b8;
 }
 
-/* Light Glassmorphism utilities */
 .glass-panel-light {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);

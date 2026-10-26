@@ -331,13 +331,13 @@ export const CreateRideModal: React.FC<CreateRideModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-normal text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+            className="rounded-md border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-normal text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
+            className="rounded-md btn-carpool px-5 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
           >
             Publish Ride to Network
           </button>

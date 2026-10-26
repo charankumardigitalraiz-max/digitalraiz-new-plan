@@ -105,7 +105,7 @@ export const TripDetailModal = ({
                       onClose();
                       onSelectRide(linkedRide);
                     }}
-                    className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
+                    className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
                   >
                     View Ride
                   </button>
@@ -197,7 +197,7 @@ export const TripDetailModal = ({
         <div className="flex items-center justify-end border-t border-slate-100 pt-4">
           <button
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 px-4 py-1.5 text-xs font-medium text-slate-700 transition-colors cursor-pointer"
+            className="rounded-md border border-slate-200 bg-slate-100 hover:bg-slate-200 px-4 py-1.5 text-xs font-medium text-slate-700 transition-colors cursor-pointer"
           >
             Close Itinerary
           </button>

@@ -67,7 +67,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
             setBackendPassengerList(res.data.passengerList);
           }
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => setIsLoadingRide(false));
     }
   }, [rideId]);
@@ -157,7 +157,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
           </p>
           <button
             onClick={() => navigate('/carpooling/rides')}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-medium text-white shadow-xs hover:bg-indigo-700 transition-all cursor-pointer"
+            className="mt-5 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-xs font-medium text-white shadow-xs hover:bg-indigo-700 transition-all cursor-pointer"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Return to Live Rides
@@ -178,7 +178,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
         {/* Back Button */}
         <Link
           to="/carpooling/rides"
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-slate-50/90 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 rounded-md border border-slate-200/90 bg-slate-50/90 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
         >
           <ArrowLeft className="h-3.5 w-3.5 text-slate-500" />
           <span>Back</span>
@@ -188,7 +188,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopyLink}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-2xs hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-2xs hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
             title="Copy Direct Link to this Manifest"
           >
             {copiedLink ? (
@@ -206,7 +206,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
 
           <button
             onClick={handleDelete}
-            className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/70 px-3 py-1.5 text-xs font-medium text-rose-600 shadow-2xs hover:bg-rose-100 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50/70 px-3 py-1.5 text-xs font-medium text-rose-600 shadow-2xs hover:bg-rose-100 transition-all cursor-pointer"
             title="Delete this ride"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -235,7 +235,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
               </span>
             </div>
 
-            <h1 className="mt-2.5 text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="mt-2.5 text-2xl font-semibold tracking-tight text-slate-900">
               {ride.originCity} <span className="text-slate-400 font-normal">→</span> {ride.destinationCity}
             </h1>
             <p className="mt-1 text-xs text-slate-500 max-w-2xl">
@@ -249,14 +249,14 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
               <>
                 <button
                   onClick={() => handleStatusUpdate('completed')}
-                  className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-medium text-emerald-700 shadow-2xs hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-medium text-emerald-700 shadow-2xs hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
                 >
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                   Mark Trip Completed
                 </button>
                 <button
                   onClick={() => handleStatusUpdate('cancelled')}
-                  className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700 shadow-2xs hover:bg-rose-100 hover:border-rose-300 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-medium text-rose-700 shadow-2xs hover:bg-rose-100 hover:border-rose-300 transition-all cursor-pointer"
                 >
                   <XCircle className="h-4 w-4 text-rose-600" />
                   Cancel Ride
@@ -267,7 +267,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
             {ride.status !== 'active' && (
               <button
                 onClick={() => handleStatusUpdate('active')}
-                className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-medium text-indigo-700 shadow-2xs hover:bg-indigo-100 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 rounded-md border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-xs font-medium text-indigo-700 shadow-2xs hover:bg-indigo-100 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="h-4 w-4 text-indigo-600" />
                 Reactivate Ride
@@ -516,11 +516,10 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-slate-900">{passenger.name}</span>
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                              passenger.bookingStatus === 'cancelled'
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${passenger.bookingStatus === 'cancelled'
                                 ? 'bg-rose-50 text-rose-700 border border-rose-200'
                                 : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            }`}
+                              }`}
                           >
                             {passenger.bookingStatus}
                           </span>
@@ -554,7 +553,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
                           type="button"
                           disabled={cancellingBookingId === passenger.bookingId}
                           onClick={() => handleCancelBooking(passenger.bookingId)}
-                          className="px-2.5 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+                          className="px-2.5 py-1.5 rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
                         >
                           {cancellingBookingId === passenger.bookingId ? 'Cancelling...' : 'Cancel Booking'}
                         </button>
@@ -684,7 +683,7 @@ export const RideDetailScreen: React.FC<RideDetailScreenProps> = ({
 
             <Link
               to="/carpooling/verifications"
-              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+              className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <span>View Driver KYC Document</span>
               <ChevronRight className="h-3 w-3 text-slate-400" />

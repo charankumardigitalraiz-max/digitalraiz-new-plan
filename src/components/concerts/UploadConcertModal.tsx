@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { X } from 'lucide-react';
 import type { ConcertEvent } from '../../types';
 import { Modal } from '../common/Modal';
 
@@ -25,6 +26,25 @@ export const UploadConcertModal = ({
   const [maxPrice, setMaxPrice] = useState(250);
   const [currency, setCurrency] = useState('INR');
   const [imageUrl, setImageUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,16 +222,38 @@ export const UploadConcertModal = ({
           </div>
         </div>
 
-        {/* Poster image link */}
+        {/* Poster image file upload */}
         <div className="space-y-1.5 border-t border-slate-100 pt-3.5">
-          <label className="text-xs font-normal text-slate-700">Poster / Stage Visual URL (Optional)</label>
-          <input
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="https://images.unsplash.com/photo-..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-purple-500 focus:bg-white focus:outline-none"
-          />
+          <label className="text-xs font-normal text-slate-700">Poster / Stage Visual (File Upload)</label>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 file:cursor-pointer border border-slate-200 rounded-xl bg-slate-50 p-1.5 focus:outline-none focus:border-purple-500 cursor-pointer"
+            />
+            {imageUrl && (
+              <div className="relative h-14 w-24 shrink-0 rounded-lg overflow-hidden border border-slate-200 shadow-2xs group">
+                <img
+                  src={imageUrl}
+                  alt="Poster preview"
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-1 right-1 h-4 w-4 rounded-full bg-slate-900/80 text-white flex items-center justify-center hover:bg-rose-600 transition-colors cursor-pointer"
+                  title="Remove image"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            )}
+          </div>
+          <p className="text-[11px] text-slate-400">
+            Upload JPG, PNG, or WEBP file for stage visuals (Optional).
+          </p>
         </div>
 
         {/* Buttons */}
@@ -219,13 +261,13 @@ export const UploadConcertModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+            className="rounded-md border border-slate-200 bg-slate-100 px-4 py-2 text-xs text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-xl bg-purple-600 hover:bg-purple-500 px-5 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
+            className="rounded-md bg-purple-600 hover:bg-purple-500 px-5 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
           >
             Upload & Publish Concert
           </button>

@@ -537,7 +537,7 @@ export const CarpoolAnalyticsCharts = ({
             {/* Quick Metrics Bar with Live Value */}
             <div className="mt-2.5 flex items-baseline justify-between gap-3">
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold tracking-tight text-slate-900">
+                <span className="text-xl font-semibold tracking-tight text-slate-900">
                   {metric === 'revenue'
                     ? `₹${totalMetricCurrent.toLocaleString()}`
                     : `${totalMetricCurrent.toLocaleString()} seats`}
@@ -722,7 +722,7 @@ export const CarpoolAnalyticsCharts = ({
                   >
                     <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1 mb-1 flex items-center justify-between text-[11px]">
                       <span>{pointsCurrent[hoveredDataIndex].data.fullDate}</span>
-                      <span className="font-bold text-emerald-700">
+                      <span className="font-semibold text-emerald-700">
                         {metric === 'revenue'
                           ? `₹${pointsCurrent[hoveredDataIndex].val.toLocaleString()}`
                           : `${pointsCurrent[hoveredDataIndex].val} seats`}
@@ -825,7 +825,7 @@ export const CarpoolAnalyticsCharts = ({
                     <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider truncate max-w-[85px]">
                       {activeDonutSegment ? activeDonutSegment.name : 'Total GMV'}
                     </span>
-                    <span className="text-sm font-bold text-slate-900 leading-tight">
+                    <span className="text-sm font-semibold text-slate-900 leading-tight">
                       {activeDonutSegment
                         ? `${activeDonutSegment.percentage}%`
                         : `₹${(totalMetricCurrent / 1000).toFixed(1)}k`}
@@ -867,7 +867,7 @@ export const CarpoolAnalyticsCharts = ({
                           </div>
                         </div>
                         <div className="text-right shrink-0 ml-2">
-                          <span className="text-xs font-bold text-slate-900 block">{seg.percentage}%</span>
+                          <span className="text-xs font-semibold text-slate-900 block">{seg.percentage}%</span>
                           <span className="text-[10px] text-slate-500">₹{(seg.value / 1000).toFixed(1)}k</span>
                         </div>
                       </div>
@@ -988,7 +988,7 @@ export const CarpoolAnalyticsCharts = ({
 
                             {/* Percentage Fill atop Bar */}
                             <span
-                              className={`text-[9.5px] font-bold mb-1 transition-all ${isHovered ? 'scale-110 font-extrabold text-emerald-600' : 'text-slate-500'
+                              className={`text-[9.5px] font-semibold mb-1 transition-all ${isHovered ? 'scale-110 font-extrabold text-emerald-600' : 'text-slate-500'
                                 }`}
                             >
                               {d.fillRate}%
@@ -1029,7 +1029,7 @@ export const CarpoolAnalyticsCharts = ({
                         style={{ width: '13%' }}
                       >
                         <div
-                          className={`text-[10.5px] font-semibold truncate transition-colors ${isHovered ? 'text-slate-900 font-bold' : d.isWeekend ? 'text-emerald-700 font-semibold' : 'text-slate-700'
+                          className={`text-[10.5px] font-semibold truncate transition-colors ${isHovered ? 'text-slate-900 font-semibold' : d.isWeekend ? 'text-emerald-700 font-semibold' : 'text-slate-700'
                             }`}
                         >
                           {d.day}
@@ -1128,7 +1128,7 @@ export const CarpoolAnalyticsCharts = ({
                             )}
 
                             <span
-                              className={`text-[10px] font-bold mb-1 transition-all ${isHovered ? 'scale-110 font-extrabold' : ''
+                              className={`text-[10px] font-semibold mb-1 transition-all ${isHovered ? 'scale-110 font-extrabold' : ''
                                 } ${t.textAccent}`}
                             >
                               {t.percentage}%

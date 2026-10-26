@@ -164,7 +164,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             type="button"
             onClick={handleReset}
             disabled={isSaving}
-            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
           >
             <RotateCcw className="h-3.5 w-3.5 text-slate-400" />
             <span>Reset Defaults</span>
@@ -174,7 +174,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer shadow-2xs hover:shadow-indigo-200 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-semibold text-white transition-all cursor-pointer shadow-2xs hover:shadow-indigo-200 disabled:opacity-50"
           >
             {isSaving ? (
               <>
@@ -211,9 +211,15 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             </p>
           </div>
 
-          <div className="relative w-44">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
+          <label
+            htmlFor="baseRatePerKmInput"
+            className="relative flex items-center w-full sm:w-48 shrink-0 cursor-text group"
+          >
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400 group-focus-within:text-indigo-600 transition-colors pointer-events-none select-none">
+              ₹
+            </span>
             <input
+              id="baseRatePerKmInput"
               type="number"
               step="0.1"
               min="0"
@@ -234,10 +240,12 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
                   setBaseRatePerKm(5.0);
                 }
               }}
-              className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/70 pl-8 pr-14 text-base font-extrabold text-slate-900 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all shadow-2xs"
+              className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50/70 pl-8.5 pr-14 text-base font-extrabold text-slate-900 outline-none hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none cursor-text"
             />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">/ km</span>
-          </div>
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 group-focus-within:text-slate-600 transition-colors pointer-events-none select-none">
+              / km
+            </span>
+          </label>
         </div>
 
         {/* Quick Presets */}
@@ -248,7 +256,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
               key={rate}
               type="button"
               onClick={() => setBaseRatePerKm(rate)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${numBaseRate === rate
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${numBaseRate === rate
                 ? 'bg-indigo-600 text-white shadow-2xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
@@ -286,23 +294,23 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             {/* Allowed Decrease (-%) */}
             <div className="rounded-xl border border-rose-200/80 bg-gradient-to-br from-rose-50/30 to-white p-5 space-y-4 shadow-2xs">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-rose-800">
+                <div className="flex items-center gap-2 text-xs font-semibold text-rose-800">
                   <div className="h-7 w-7 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600">
                     <ArrowDownRight className="h-4 w-4" />
                   </div>
                   <span>Can Decrease Percentage (-%)</span>
                 </div>
               </div>
-
+              {/* 
               <p className="text-xs text-slate-500">
                 Maximum discount a passenger can negotiate <strong>below</strong> the decided price of ₹{numBaseRate}/km.
-              </p>
+              </p> */}
 
               {/* Direct Number Input */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Decrease Percentage Limit</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-rose-500">-</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-rose-500">-</span>
                   <input
                     type="number"
                     min="0"
@@ -324,10 +332,10 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
                         setMinAllowedDeviationPercent(0);
                       }
                     }}
-                    className="w-full h-11 rounded-xl border border-rose-200 bg-white pl-8 pr-12 text-base font-bold text-rose-700 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all shadow-2xs"
+                    className="w-full h-11 rounded-xl border border-rose-200 bg-white pl-8 pr-12 text-base font-semibold text-rose-700 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all shadow-2xs"
                     placeholder="0"
                   />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">%</span>
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">%</span>
                 </div>
               </div>
 
@@ -360,7 +368,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             {/* Allowed Increase (+%) */}
             <div className="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/30 to-white p-5 space-y-4 shadow-2xs">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-800">
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800">
                   <div className="h-7 w-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
                     <ArrowUpRight className="h-4 w-4" />
                   </div>
@@ -368,15 +376,15 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500">
+              {/* <p className="text-xs text-slate-500">
                 Maximum markup a user/driver can negotiate <strong>above</strong> the decided price of ₹{numBaseRate}/km.
-              </p>
+              </p> */}
 
               {/* Direct Number Input */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-700">Increase Percentage Limit</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-emerald-500">+</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-emerald-500">+</span>
                   <input
                     type="number"
                     min="0"
@@ -398,10 +406,10 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
                         setMaxAllowedDeviationPercent(0);
                       }
                     }}
-                    className="w-full h-11 rounded-xl border border-emerald-200 bg-white pl-8 pr-12 text-base font-bold text-emerald-700 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all shadow-2xs"
+                    className="w-full h-11 rounded-xl border border-emerald-200 bg-white pl-8 pr-12 text-base font-semibold text-emerald-700 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all shadow-2xs"
                     placeholder="0"
                   />
-                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">%</span>
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">%</span>
                 </div>
               </div>
 
@@ -447,7 +455,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             </div>
 
             <div className="relative w-36">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₹</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">₹</span>
               <input
                 type="number"
                 step="0.5"
@@ -469,7 +477,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
                     setPlatformCharge(0);
                   }
                 }}
-                className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-8 pr-3 text-xs font-bold text-slate-800 outline-none focus:border-indigo-500 shadow-2xs"
+                className="w-full h-10 rounded-xl border border-slate-200 bg-white pl-8 pr-3 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 shadow-2xs"
               />
             </div>
           </div> */}
@@ -479,7 +487,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-indigo-600" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800">
                   Live Trip Negotiation Simulation
                 </h3>
               </div>
@@ -490,7 +498,7 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
                     key={dist}
                     type="button"
                     onClick={() => setSimulatedDistanceKm(dist)}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${simulatedDistanceKm === dist
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${simulatedDistanceKm === dist
                       ? 'bg-indigo-600 text-white shadow-2xs'
                       : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
@@ -505,10 +513,10 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Node 1: Floor Offer */}
               <div className="bg-white rounded-xl p-4 border border-rose-100 shadow-2xs text-center space-y-1">
-                <div className="text-[11px] font-bold text-rose-600 uppercase tracking-wider">
+                <div className="text-[11px] font-semibold text-rose-600 uppercase tracking-wider">
                   Lowest Acceptable Offer (-{numMinDev}%)
                 </div>
-                <div className="text-2xl font-bold text-rose-700">
+                <div className="text-2xl font-semibold text-rose-700">
                   ₹{simulatedFloorFare}
                 </div>
                 <div className="text-xs text-slate-400 font-medium">
@@ -518,10 +526,10 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
 
               {/* Node 2: Decided Standard Benchmark */}
               <div className="bg-white rounded-xl p-4 border-2 border-indigo-600 shadow-2xs text-center space-y-1 relative">
-                <div className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">
+                <div className="text-[11px] font-semibold text-indigo-600 uppercase tracking-wider">
                   Standard Fare Benchmark
                 </div>
-                <div className="text-2xl font-bold text-indigo-950">
+                <div className="text-2xl font-semibold text-indigo-950">
                   ₹{simulatedStandardFare}
                 </div>
                 <div className="text-xs text-indigo-600 font-semibold">
@@ -531,10 +539,10 @@ export const CarpoolSettings: React.FC<CarpoolSettingsProps> = ({ onShowToast })
 
               {/* Node 3: Ceiling Offer */}
               <div className="bg-white rounded-xl p-4 border border-emerald-100 shadow-2xs text-center space-y-1">
-                <div className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
+                <div className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">
                   Highest Acceptable Bid (+{numMaxDev}%)
                 </div>
-                <div className="text-2xl font-bold text-emerald-700">
+                <div className="text-2xl font-semibold text-emerald-700">
                   ₹{simulatedCeilingFare}
                 </div>
                 <div className="text-xs text-slate-400 font-medium">

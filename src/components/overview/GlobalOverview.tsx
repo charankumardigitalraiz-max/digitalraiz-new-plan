@@ -50,7 +50,7 @@ export const GlobalOverview = ({
   return (
     <div className="space-y-4">
       {/* Screen Title & Subtitle Banner Card */}
-      <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="rounded-lg border border-slate-200/90 bg-white p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-[22px] font-semibold tracking-tight text-slate-900">
             Overview
@@ -85,21 +85,21 @@ export const GlobalOverview = ({
           <div className="mt-5 flex flex-wrap gap-2.5">
             <button
               onClick={onOpenCreateRide}
-              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
             >
               <Car className="h-3.5 w-3.5" />
               <span>Dispatch Carpool</span>
             </button>
             <button
               onClick={onOpenUploadConcert}
-              className="flex items-center gap-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 px-4 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 rounded-md bg-purple-600 hover:bg-purple-500 px-4 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
             >
               <Music className="h-3.5 w-3.5" />
               <span>Upload Concert</span>
             </button>
             <button
               onClick={onOpenCreateTrip}
-              className="flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 px-4 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 rounded-md bg-amber-600 hover:bg-amber-500 px-4 py-2 text-xs font-normal text-white shadow-xs transition-all cursor-pointer"
             >
               <Compass className="h-3.5 w-3.5" />
               <span>Create Trip Plan</span>

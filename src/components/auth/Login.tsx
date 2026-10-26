@@ -354,7 +354,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </div>
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                <h1 className="text-xl font-semibold tracking-tight text-slate-900 flex items-center gap-2">
                   Wayfer
                 </h1>
                 <p className="text-xs text-slate-500 font-normal">Global Mobility & Events Ecosystem</p>
@@ -429,7 +429,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {/* Mode Switcher Tabs */}
               <div className="flex items-center border-b border-slate-100 pb-4 mb-5 justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-semibold text-slate-900">
                     {authMode === 'login' && 'Administrator Sign In'}
                     {authMode === 'register' && 'Register Admin Account'}
                     {authMode === 'forgot' && 'Reset Access Passcode'}
@@ -451,7 +451,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       setErrorMessage('');
                       setSuccessMessage('');
                     }}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${authMode === 'login'
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${authMode === 'login'
                       ? 'bg-white text-indigo-600 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800'
                       }`}
@@ -465,7 +465,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       setErrorMessage('');
                       setSuccessMessage('');
                     }}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${authMode === 'register'
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${authMode === 'register'
                       ? 'bg-white text-indigo-600 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800'
                       }`}
@@ -578,7 +578,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full mt-2 flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">
@@ -939,7 +939,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full mt-2 flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">
@@ -982,7 +982,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 rounded-md bg-indigo-600 hover:bg-indigo-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">
@@ -1068,7 +1068,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 py-2.5 px-4 text-xs font-semibold text-white shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2">
@@ -1109,7 +1109,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         key={preset.user.id}
                         type="button"
                         onClick={() => selectPreset(preset)}
-                        className={`flex flex-col items-center text-center p-2 rounded-xl border text-[11px] transition-all cursor-pointer ${isSelected
+                        className={`flex flex-col items-center text-center p-2 rounded-md border text-[11px] transition-all cursor-pointer ${isSelected
                           ? 'bg-indigo-50 border-indigo-300 text-indigo-900 shadow-2xs font-semibold'
                           : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
                           }`}

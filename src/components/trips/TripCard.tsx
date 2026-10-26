@@ -108,14 +108,14 @@ export const TripCard = ({
           <div className="flex items-center gap-1">
             <button
               onClick={() => onSelect(trip)}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+              className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
               title="Inspect Itinerary"
             >
               <Eye className="h-4 w-4" />
             </button>
             <button
               onClick={() => onDelete(trip.id)}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+              className="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
               title="Delete Trip"
             >
               <Trash2 className="h-4 w-4" />

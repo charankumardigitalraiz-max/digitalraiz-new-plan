@@ -151,13 +151,13 @@ export const ConcertDetailModal = ({
                 onStatusChange(concert.id, concert.status === 'active' ? 'cancelled' : 'active');
                 onClose();
               }}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               {concert.status === 'active' ? 'Archive Event' : 'Reactivate Event'}
             </button>
             <button
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 px-4 py-1.5 text-xs font-medium text-slate-700 transition-colors cursor-pointer"
+              className="rounded-md border border-slate-200 bg-slate-100 hover:bg-slate-200 px-4 py-1.5 text-xs font-medium text-slate-700 transition-colors cursor-pointer"
             >
               Close
             </button>

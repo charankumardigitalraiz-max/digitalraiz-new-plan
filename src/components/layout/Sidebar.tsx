@@ -47,6 +47,57 @@ interface SidebarProps {
   currentUser?: AdminUser | null;
   onLogout?: () => void;
 }
+interface ModuleColorStyle {
+  activeBg: string;
+  activeText: string;
+  activeIcon: string;
+  activeSubBg: string;
+  activeBadgeBg: string;
+  activeBadgeText: string;
+}
+
+const MODULE_STYLES: Record<string, ModuleColorStyle> = {
+  carpooling: {
+    activeBg: 'bg-indigo-50 text-indigo-700',
+    activeText: 'text-indigo-700',
+    activeIcon: 'text-indigo-600',
+    activeSubBg: 'bg-indigo-50/90 text-indigo-700',
+    activeBadgeBg: 'bg-indigo-100',
+    activeBadgeText: 'text-indigo-700'
+  },
+  concerts: {
+    activeBg: 'bg-purple-50 text-purple-700',
+    activeText: 'text-purple-700',
+    activeIcon: 'text-purple-600',
+    activeSubBg: 'bg-purple-50/90 text-purple-700',
+    activeBadgeBg: 'bg-purple-100',
+    activeBadgeText: 'text-purple-700'
+  },
+  trips: {
+    activeBg: 'bg-amber-50 text-amber-700',
+    activeText: 'text-amber-700',
+    activeIcon: 'text-amber-600',
+    activeSubBg: 'bg-amber-50/90 text-amber-700',
+    activeBadgeBg: 'bg-amber-100',
+    activeBadgeText: 'text-amber-700'
+  },
+  'stranger-meets': {
+    activeBg: 'bg-teal-50 text-teal-700',
+    activeText: 'text-teal-700',
+    activeIcon: 'text-teal-600',
+    activeSubBg: 'bg-teal-50/90 text-teal-700',
+    activeBadgeBg: 'bg-teal-100',
+    activeBadgeText: 'text-teal-700'
+  },
+  users: {
+    activeBg: 'bg-blue-50 text-blue-700',
+    activeText: 'text-blue-700',
+    activeIcon: 'text-blue-600',
+    activeSubBg: 'bg-blue-50/90 text-blue-700',
+    activeBadgeBg: 'bg-blue-100',
+    activeBadgeText: 'text-blue-700'
+  }
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab = 'carpooling',
@@ -127,8 +178,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Music,
       badge: concertCount,
       subItems: [
+        { id: 'overview', label: 'Overview' },
         { id: 'all-concerts', label: 'All Concerts', badge: concertCount },
-        { id: 'venues', label: 'Stages & Venues' }
+        { id: 'venues', label: 'Venues & Stages' },
+        { id: 'artists', label: 'Artists & Headliners' }
       ]
     },
     {
@@ -165,7 +218,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-base font-bold tracking-tight text-slate-900 font-sans">
+              <span className="text-base font-semibold tracking-tight text-slate-900 font-sans">
                 DigitalRaiz
               </span>
               {/* <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600 border border-indigo-200/70 shadow-2xs">
@@ -189,15 +242,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             navigate('/overview');
             onTabChange?.('overview', 'overview-pulse');
           }}
-          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-semibold transition-colors text-left cursor-pointer ${location.pathname === '/overview' || location.pathname === '/' || activeTab === 'overview'
-            ? 'bg-sidebar-active text-sidebar-active'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors text-left cursor-pointer ${location.pathname === '/overview' || location.pathname === '/' || activeTab === 'overview'
+              ? 'bg-slate-100 text-slate-900 font-semibold shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
             }`}
         >
           <Compass
-            className={`h-4 w-4 shrink-0 ${location.pathname === '/overview' || location.pathname === '/' || activeTab === 'overview'
-              ? 'text-sidebar-active'
-              : 'text-slate-400'
+            className={`h-4 w-4 shrink-0 transition-colors ${location.pathname === '/overview' || location.pathname === '/' || activeTab === 'overview'
+                ? 'text-indigo-600'
+                : 'text-slate-400'
               }`}
           />
           <span>Overview</span>
@@ -210,16 +263,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             navigate('/users');
             onTabChange?.('users');
           }}
-          className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-[13px] font-semibold transition-colors text-left cursor-pointer ${location.pathname.startsWith('/users') || activeTab === 'users'
-            ? 'bg-sidebar-active text-sidebar-active'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+          className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-[13px] transition-colors text-left cursor-pointer ${location.pathname.startsWith('/users') || activeTab === 'users'
+              ? 'bg-blue-50 text-blue-700 font-semibold shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
             }`}
         >
           <div className="flex items-center gap-2.5">
             <Users
-              className={`h-4 w-4 shrink-0 ${location.pathname.startsWith('/users') || activeTab === 'users'
-                ? 'text-sidebar-active'
-                : 'text-slate-400'
+              className={`h-4 w-4 shrink-0 transition-colors ${location.pathname.startsWith('/users') || activeTab === 'users'
+                  ? 'text-blue-600'
+                  : 'text-slate-400'
                 }`}
             />
             <span>Customers</span>
@@ -238,36 +291,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
             activeTab === item.id ||
             (item.id === 'carpooling' && location.pathname.startsWith('/drivers'));
           const isExpanded = !!expandedTabs[item.id];
+          const style = MODULE_STYLES[item.id] || MODULE_STYLES.carpooling;
 
           return (
-            <div key={item.id} className="space-y-2">
+            <div key={item.id} className="space-y-1">
               {/* Parent Nav Item */}
               <button
                 type="button"
                 onClick={() => handleParentClick(item)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-[13px] font-semibold transition-colors text-left cursor-pointer ${isItemActive
-                  ? 'bg-sidebar-active text-sidebar-active'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-[13px] transition-colors text-left cursor-pointer ${isItemActive
+                    ? `${style.activeBg} font-semibold shadow-2xs`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
                   }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0 pr-1">
                   <Icon
-                    className={`h-4 w-4 shrink-0 transition-colors ${isItemActive ? 'text-sidebar-active' : 'text-slate-400'
+                    className={`h-4 w-4 shrink-0 transition-colors ${isItemActive ? style.activeIcon : 'text-slate-400'
                       }`}
                   />
                   <span className="truncate">{item.label}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0 ml-1">
-                  {/* {item.badge !== undefined && !isExpanded && (
-                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-normal bg-slate-100 text-slate-600">
-                      {item.badge}
-                    </span>
-                  )} */}
                   {item.subItems && item.subItems.length > 0 && (
                     <span
                       onClick={(e) => toggleTab(item.id, e)}
-                      className={`p-0.5 transition-colors ${isItemActive ? 'text-sidebar-active' : 'text-slate-400 hover:text-slate-600'
+                      className={`p-0.5 transition-colors ${isItemActive ? style.activeText : 'text-slate-400 hover:text-slate-600'
                         }`}
                     >
                       {isExpanded ? (
@@ -280,7 +329,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </button>
 
-              {/* Sub-Tabs: Clean Tree with Soft Indigo Active Pill */}
+              {/* Sub-Tabs: Clean Tree with Module-Colored Active Pill */}
               {isExpanded && item.subItems && item.subItems.length > 0 && (
                 <div className="ml-6 pl-3 border-l border-slate-200/80 my-1 space-y-0.5">
                   {item.subItems.map((sub) => {
@@ -288,7 +337,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     const isSubActive =
                       location.pathname === subPath ||
                       (location.pathname === `/${item.id}` && sub.id === item.subItems?.[0].id) ||
-                      (sub.id === 'verifications' && location.pathname === '/drivers');
+                      (sub.id === 'verifications' && location.pathname === '/drivers') ||
+                      (item.id === 'concerts' &&
+                        sub.id === 'all-concerts' &&
+                        (location.pathname === '/concerts/all-concerts' ||
+                          (location.pathname.startsWith('/concerts/') &&
+                            !['overview', 'venues', 'artists'].some((segment) =>
+                              location.pathname.startsWith(`/concerts/${segment}`)
+                            ))));
 
                     return (
                       <button
@@ -299,8 +355,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           onTabChange?.(item.id, sub.id);
                         }}
                         className={`w-full flex items-center justify-between rounded-md px-2.5 py-1.5 text-xs transition-colors text-left cursor-pointer ${isSubActive
-                          ? 'bg-sidebar-active text-sidebar-active font-semibold'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+                            ? `${style.activeSubBg} font-semibold shadow-2xs`
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
                           }`}
                       >
                         <span className="truncate">{sub.label}</span>
@@ -308,10 +364,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         {sub.badge !== undefined && (
                           <span
                             className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium shrink-0 ml-1.5 ${sub.isPendingBadge
-                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                              : isSubActive
-                                ? 'bg-white text-sidebar-active shadow-2xs'
-                                : 'bg-slate-100 text-slate-500'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : isSubActive
+                                  ? `${style.activeBadgeBg} ${style.activeBadgeText}`
+                                  : 'bg-slate-100 text-slate-500'
                               }`}
                           >
                             {sub.isPendingBadge && (
@@ -344,11 +400,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onTabChange?.('settings');
           }}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors text-left cursor-pointer ${location.pathname === '/settings' || activeTab === 'settings'
-            ? 'bg-sidebar-active text-sidebar-active font-semibold'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              ? 'bg-slate-100 text-slate-900 font-semibold shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
             }`}
         >
-          <Settings className={`h-4 w-4 shrink-0 ${location.pathname === '/settings' ? 'text-sidebar-active' : 'text-slate-400'}`} />
+          <Settings className={`h-4 w-4 shrink-0 transition-colors ${location.pathname === '/settings' || activeTab === 'settings' ? 'text-slate-700' : 'text-slate-400'
+            }`} />
           <span>Settings</span>
         </button>
 
@@ -359,11 +416,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onTabChange?.('help');
           }}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] transition-colors text-left cursor-pointer ${location.pathname === '/help' || activeTab === 'help'
-            ? 'bg-sidebar-active text-sidebar-active font-semibold'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+              ? 'bg-slate-100 text-slate-900 font-semibold shadow-2xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
             }`}
         >
-          <HelpCircle className={`h-4 w-4 shrink-0 ${location.pathname === '/help' ? 'text-sidebar-active' : 'text-slate-400'}`} />
+          <HelpCircle className={`h-4 w-4 shrink-0 transition-colors ${location.pathname === '/help' || activeTab === 'help' ? 'text-slate-700' : 'text-slate-400'
+            }`} />
           <span>Help & Support</span>
         </button>
       </div>
@@ -391,7 +449,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onLogout}
               title="Sign Out"
-              className="p-1.5 rounded-lg text-rose-600 bg-rose-50 transition-colors cursor-pointer shrink-0"
+              className="p-1.5 rounded-md text-rose-600 bg-rose-50 transition-colors cursor-pointer shrink-0"
             >
               <LogOut className="h-4 w-4" />
             </button>

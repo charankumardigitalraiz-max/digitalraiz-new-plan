@@ -226,7 +226,7 @@ export const StrangerMeetDetailModal: React.FC<StrangerMeetDetailModalProps> = (
                     onStatusChange(meet.id, 'completed');
                     onClose();
                   }}
-                  className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Mark Completed
@@ -236,7 +236,7 @@ export const StrangerMeetDetailModal: React.FC<StrangerMeetDetailModalProps> = (
                     onStatusChange(meet.id, 'cancelled');
                     onClose();
                   }}
-                  className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
                 >
                   <XCircle className="h-3.5 w-3.5" />
                   Cancel Meetup
@@ -246,7 +246,7 @@ export const StrangerMeetDetailModal: React.FC<StrangerMeetDetailModalProps> = (
 
             <button
               onClick={onClose}
-              className="rounded-lg border border-slate-200 bg-slate-100 px-4 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+              className="rounded-md border border-slate-200 bg-slate-100 px-4 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
             >
               Close
             </button>

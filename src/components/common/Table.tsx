@@ -20,6 +20,7 @@ export interface TablePaginationProps {
   onPageSizeChange?: (size: number) => void;
   pageSizeOptions?: number[];
   itemName?: string;
+  activeColor?: string;
   /**
    * If true (default), Table will automatically slice the `data` array based on currentPage and pageSize.
    * If false, `data` is assumed to be already sliced by the caller.
@@ -168,6 +169,7 @@ export function Table<T>({
           onPageSizeChange={pagination.onPageSizeChange}
           pageSizeOptions={pagination.pageSizeOptions}
           itemName={pagination.itemName}
+          activeColor={pagination.activeColor}
         />
       )}
     </div>

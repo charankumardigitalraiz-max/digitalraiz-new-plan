@@ -168,7 +168,7 @@ export const StrangerMeetCard: React.FC<StrangerMeetCardProps> = ({
                 e.stopPropagation();
                 onDelete(meet.id);
               }}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+              className="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
               title="Remove Meetup"
             >
               <Trash2 className="h-3.5 w-3.5" />

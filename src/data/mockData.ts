@@ -1,4 +1,4 @@
-import type { CarpoolRide, ConcertEvent, TripPlan, Driver, StrangerMeet } from '../types';
+import type { CarpoolRide, ConcertEvent, TripPlan, Driver, StrangerMeet, Venue, Artist } from '../types';
 
 export const mockDrivers: Driver[] = [
   {
@@ -226,6 +226,8 @@ export const mockConcerts: ConcertEvent[] = [
       { name: 'Tier 1 Seated Vista', price: 110, available: 680, total: 6000 },
       { name: 'VIP Hologram Circle', price: 220, available: 480, total: 2500 }
     ],
+    supportingActs: ['Kevin de Vries', 'Argy', 'Massano'],
+    ageRestriction: '18+',
     organizer: 'LiveNation Global Productions',
     connectedRidesCount: 42
   },
@@ -251,6 +253,8 @@ export const mockConcerts: ConcertEvent[] = [
       { name: 'Grandstand Level 2', price: 145, available: 850, total: 25000 },
       { name: 'Infinity Kinetic Lounge', price: 350, available: 150, total: 9000 }
     ],
+    supportingActs: ['CHVRCHES', 'Prateek Kuhad'],
+    ageRestriction: 'All Ages',
     organizer: 'Green Planet Entertainment',
     connectedRidesCount: 88
   },
@@ -688,3 +692,237 @@ export const platformStats = {
   strangerMeetsActive: 18,
   pendingDriverVerifications: 14
 };
+
+export const mockVenues: Venue[] = [
+  {
+    id: 'ven-01',
+    name: 'Narendra Modi Stadium',
+    city: 'Ahmedabad',
+    capacity: 74000,
+    address: 'Motera, Sabarmati, Ahmedabad, Gujarat 380005',
+    soundSystem: 'L-Acoustics K1 Stadium Array with K1-SB subwoofers',
+    type: 'Stadium',
+    contactPerson: 'Bhavesh Patel (+91 98250 11920)',
+    status: 'active'
+  },
+  {
+    id: 'ven-02',
+    name: 'Jawaharlal Nehru Stadium',
+    city: 'Delhi',
+    capacity: 45000,
+    address: 'Pragati Vihar, Bhishma Pitamah Marg, New Delhi 110003',
+    soundSystem: 'd&b audiotechnik GSL System & SL-SUB arc',
+    type: 'Stadium',
+    contactPerson: 'Sunil Aggarwal (+91 98110 44291)',
+    status: 'active'
+  },
+  {
+    id: 'ven-03',
+    name: 'Jio World Garden',
+    city: 'Mumbai',
+    capacity: 22000,
+    address: 'Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051',
+    soundSystem: 'Meyer Sound PANTHER Line Array & 2100-LFC',
+    type: 'Open Grounds',
+    contactPerson: 'Farhan Dastoor (+91 98200 88291)',
+    status: 'active'
+  },
+  {
+    id: 'ven-04',
+    name: 'Gachibowli Stadium Athletic Arena',
+    city: 'Hyderabad',
+    capacity: 18000,
+    address: 'Old Mumbai Highway, Gachibowli, Hyderabad, Telangana 500032',
+    soundSystem: 'JBL VTX A12 Acoustic Rig & Delay Towers',
+    type: 'Stadium',
+    contactPerson: 'K. S. Rao (+91 98490 22391)',
+    status: 'active'
+  },
+  {
+    id: 'ven-05',
+    name: 'Phoenix Marketcity Amphitheatre',
+    city: 'Bengaluru',
+    capacity: 8500,
+    address: 'Whitefield Main Road, Mahadevapura, Bengaluru, Karnataka 560048',
+    soundSystem: 'Adamson E-Series Line Array',
+    type: 'Club',
+    contactPerson: 'Cherian George (+91 98860 39182)',
+    status: 'active'
+  }
+];
+
+export const mockArtists: Artist[] = [
+  {
+    id: 'art-001',
+    name: 'Anyma',
+    stageName: 'Matteo Milleri (Tale of Us / Anyma)',
+    genre: 'EDM',
+    subGenres: ['Melodic Techno', 'Cinematic Visuals', 'Cyber Electro'],
+    bio: 'Pioneering audiovisual electronic act blending humanoid robotics, AI aesthetics, and soaring melodic techno soundscapes across global stadiums.',
+    avatar: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=600&auto=format&fit=crop&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200&auto=format&fit=crop&q=80',
+    country: 'United States',
+    city: 'New York / Milan',
+    monthlyListeners: '14.8M',
+    status: 'touring',
+    verified: true,
+    totalConcerts: 34,
+    upcomingConcerts: 6,
+    socialLinks: {
+      spotify: 'https://open.spotify.com/artist/anyma',
+      instagram: 'https://instagram.com/anyma_ofc',
+      youtube: 'https://youtube.com/@anyma',
+      appleMusic: 'https://music.apple.com/artist/anyma'
+    },
+    management: {
+      managerName: 'Alessio DeVecchi',
+      agency: 'Wasserman Music Global',
+      email: 'booking@afterlife.com',
+      phone: '+1 (310) 867-4200'
+    },
+    rider: {
+      microphonePreference: 'Shure Axient Digital Dual Handheld (Custom Black)',
+      inEarMonitors: 'JH Audio Roxanne Custom Fit IEMs',
+      hospitalityNotes: 'Organic vegan catering, fresh ginger-lemon infusion, dark roast Italian espresso, zero single-use plastic',
+      stagePlotNotes: 'Center stage riser for synth & Ableton Push 3 rig, 8k LED wall sync triggers via SMPTE timecode'
+    }
+  },
+  {
+    id: 'art-002',
+    name: 'Arijit Singh',
+    stageName: 'Arijit Singh Live',
+    genre: 'Bollywood',
+    subGenres: ['Playback', 'Sufi Rock', 'Acoustic Soul', 'Classical Fusion'],
+    bio: 'India’s most streamed vocalist and legendary soul singer renowned for captivating arena performances with a 35-piece live grand orchestra.',
+    avatar: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80',
+    country: 'India',
+    city: 'Mumbai',
+    monthlyListeners: '43.2M',
+    status: 'touring',
+    verified: true,
+    totalConcerts: 52,
+    upcomingConcerts: 8,
+    socialLinks: {
+      spotify: 'https://open.spotify.com/artist/arijitsingh',
+      instagram: 'https://instagram.com/arijitsingh',
+      youtube: 'https://youtube.com/@arijitsinghofficial'
+    },
+    management: {
+      managerName: 'Tarsame Mittal',
+      agency: 'TM Talent Management',
+      email: 'arijit@tmtalent.in',
+      phone: '+91 98200 45890'
+    },
+    rider: {
+      microphonePreference: 'Neumann KMS 105 Condenser Microphone',
+      inEarMonitors: 'Sennheiser 2000 Series Wireless IEM',
+      hospitalityNotes: 'Warm honey-lemon water, herbal green tea, private quiet greenroom with acoustic tuning',
+      stagePlotNotes: 'Full symphonic stage layout, grand piano stage left, 12 string section risers stage right'
+    }
+  },
+  {
+    id: 'art-003',
+    name: 'Coldplay',
+    stageName: 'Coldplay (Chris, Jonny, Guy, Will)',
+    genre: 'Rock',
+    subGenres: ['Alternative Rock', 'Stadium Anthems', 'Pop Rock'],
+    bio: 'One of the best-selling music acts in history, delivering breathtaking eco-powered stadium experiences with synced LED wristbands and kinetic floors.',
+    avatar: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=600&auto=format&fit=crop&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&auto=format&fit=crop&q=80',
+    country: 'United Kingdom',
+    city: 'London',
+    monthlyListeners: '86.4M',
+    status: 'touring',
+    verified: true,
+    totalConcerts: 110,
+    upcomingConcerts: 14,
+    socialLinks: {
+      spotify: 'https://open.spotify.com/artist/coldplay',
+      instagram: 'https://instagram.com/coldplay',
+      youtube: 'https://youtube.com/@coldplay',
+      appleMusic: 'https://music.apple.com/artist/coldplay'
+    },
+    management: {
+      managerName: 'Phil Harvey & Dave Holmes',
+      agency: 'WME Touring',
+      email: 'coldplaytour@wmeagency.com',
+      phone: '+44 20 7534 6000'
+    },
+    rider: {
+      microphonePreference: 'Sennheiser Digital 6000 with custom rainbow foam',
+      inEarMonitors: 'Ultimate Ears Pro 18+ Custom IEMs',
+      hospitalityNotes: '100% sustainable catering, solar battery charging stations, zero single-use plastics',
+      stagePlotNotes: 'Kinetic energy dance floors, confetti cannons (biodegradable), XYLO wristband RF transmitter towers'
+    }
+  },
+  {
+    id: 'art-004',
+    name: 'Diljit Dosanjh',
+    stageName: 'Dil-Luminati Tour',
+    genre: 'Punjabi',
+    subGenres: ['Punjabi Pop', 'Folk Fusion', 'Bhangra Hip-Hop'],
+    bio: 'Global Punjabi music superstar who made history selling out iconic arenas and stadiums worldwide with high-voltage folk beats and charisma.',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1200&auto=format&fit=crop&q=80',
+    country: 'India',
+    city: 'Chandigarh / Toronto',
+    monthlyListeners: '24.1M',
+    status: 'touring',
+    verified: true,
+    totalConcerts: 40,
+    upcomingConcerts: 10,
+    socialLinks: {
+      spotify: 'https://open.spotify.com/artist/diljitdosanjh',
+      instagram: 'https://instagram.com/diljitdosanjh',
+      youtube: 'https://youtube.com/@diljitdosanjh'
+    },
+    management: {
+      managerName: 'Sonali Singh',
+      agency: 'Ripple Effect Studios',
+      email: 'management@diljitdosanjh.com',
+      phone: '+91 99100 23456'
+    },
+    rider: {
+      microphonePreference: 'Shure KSM9 Wireless Handheld (Gold Plated)',
+      inEarMonitors: 'Westone ES60 Custom Monitors',
+      hospitalityNotes: 'Almond milk lattes, dry fruit platters, fresh Punjabi kulhad chai',
+      stagePlotNotes: 'Center runway thrust 25 meters into stadium crowd, CO2 jets & flame cannons'
+    }
+  },
+  {
+    id: 'art-005',
+    name: 'Martin Garrix',
+    stageName: 'Martin Garrix Live',
+    genre: 'EDM',
+    subGenres: ['Progressive House', 'Big Room', 'Festival Electro'],
+    bio: 'Multi-time World #1 DJ headlining major international arena residencies and festivals with signature energetic synth drops and laser architecture.',
+    avatar: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1200&auto=format&fit=crop&q=80',
+    country: 'Netherlands',
+    city: 'Amsterdam',
+    monthlyListeners: '32.6M',
+    status: 'touring',
+    verified: true,
+    totalConcerts: 88,
+    upcomingConcerts: 12,
+    socialLinks: {
+      spotify: 'https://open.spotify.com/artist/martingarrix',
+      instagram: 'https://instagram.com/martingarrix',
+      youtube: 'https://youtube.com/@martingarrix'
+    },
+    management: {
+      managerName: 'Scooter Braun & Watse de Jong',
+      agency: 'STMPD RCRDS',
+      email: 'mgmt@stmpdrcrds.com',
+      phone: '+31 20 894 3300'
+    },
+    rider: {
+      microphonePreference: 'Sennheiser Wireless Vocal System',
+      inEarMonitors: 'Custom In-Ear Pro Sound',
+      hospitalityNotes: 'Red Bull, cold still water, fresh local fruits, private gym access',
+      stagePlotNotes: '4x Pioneer CDJ-3000, 1x DJM-A9 mixer, pyrotechnic cues timed to rekordbox'
+    }
+  }
+];
+

@@ -231,7 +231,7 @@ export const TripPlannerDashboard: React.FC<TripPlannerDashboardProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onSubTabChange?.('all-trips')}
-            className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${activeSubTab === 'all-trips'
+            className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${activeSubTab === 'all-trips'
                 ? 'bg-sidebar-active text-sidebar-active font-semibold'
                 : 'text-slate-600 hover:bg-slate-100'
               }`}
@@ -242,7 +242,7 @@ export const TripPlannerDashboard: React.FC<TripPlannerDashboardProps> = ({
 
           <button
             onClick={() => onSubTabChange?.('companions')}
-            className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${activeSubTab === 'companions'
+            className={`flex items-center gap-2 rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${activeSubTab === 'companions'
                 ? 'bg-sidebar-active text-sidebar-active font-semibold'
                 : 'text-slate-600 hover:bg-slate-100'
               }`}
@@ -266,7 +266,7 @@ export const TripPlannerDashboard: React.FC<TripPlannerDashboardProps> = ({
                     setSelectedCategory(cat);
                     setTripsPage(1);
                   }}
-                  className={`rounded-lg px-2.5 py-1 text-xs transition-colors cursor-pointer ${selectedCategory === cat
+                  className={`rounded-md px-2.5 py-1 text-xs transition-colors cursor-pointer ${selectedCategory === cat
                       ? 'bg-amber-50 text-amber-800 border border-amber-200 font-semibold'
                       : 'text-slate-600 hover:bg-slate-100 font-medium'
                     }`}
@@ -278,7 +278,7 @@ export const TripPlannerDashboard: React.FC<TripPlannerDashboardProps> = ({
 
             <button
               onClick={onOpenCreateModal}
-              className="flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 px-3.5 py-1.5 text-xs font-medium text-white shadow-xs transition-all cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 rounded-md bg-amber-600 hover:bg-amber-500 px-3.5 py-1.5 text-xs font-medium text-white shadow-xs transition-all cursor-pointer shrink-0"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Create Trip Plan</span>
@@ -292,7 +292,7 @@ export const TripPlannerDashboard: React.FC<TripPlannerDashboardProps> = ({
             <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5">
               <button
                 onClick={() => setCompanionsViewMode('table')}
-                className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs transition-colors cursor-pointer ${companionsViewMode === 'table'
+                className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs transition-colors cursor-pointer ${companionsViewMode === 'table'
                     ? 'bg-white text-slate-800 shadow-2xs font-medium'
                     : 'text-slate-500 hover:text-slate-800'
                   }`}
@@ -303,7 +303,7 @@ export const TripPlannerDashboard: React.FC<TripPlannerDashboardProps> = ({
               </button>
               <button
                 onClick={() => setCompanionsViewMode('cards')}
-                className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs transition-colors cursor-pointer ${companionsViewMode === 'cards'
+                className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs transition-colors cursor-pointer ${companionsViewMode === 'cards'
                     ? 'bg-white text-slate-800 shadow-2xs font-medium'
                     : 'text-slate-500 hover:text-slate-800'
                   }`}

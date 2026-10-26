@@ -107,10 +107,15 @@ export interface ConcertEvent {
   id: string;
   title: string;
   artist: string;
+  supportingActs?: string[];
+  tourName?: string;
   genre: 'EDM' | 'Rock' | 'Pop' | 'Hip-Hop' | 'Indie' | 'Classical' | 'Jazz';
+  genres?: string[];
   date: string;
   doorsOpen: string;
+  showTime?: string;
   venueName: string;
+  venueAddress?: string;
   city: string;
   country: string;
   image: string;
@@ -128,6 +133,12 @@ export interface ConcertEvent {
   }[];
   organizer: string;
   connectedRidesCount: number;
+  soundSystem?: string;
+  ageRestriction?: string;
+  durationHours?: string;
+  languages?: string[];
+  gallery?: string[];
+  videoUrl?: string;
 }
 
 export interface TripItineraryDay {
@@ -202,6 +213,62 @@ export interface StrangerMeet {
   safetyGuidelines: string[];
   status: 'upcoming' | 'active' | 'completed' | 'cancelled';
   vibeTags: string[];
+}
+
+export interface Venue {
+  id: string;
+  name: string;
+  city: string;
+  capacity: number;
+  address: string;
+  soundSystem: string;
+  type: 'Stadium' | 'Arena' | 'Open Grounds' | 'Club' | 'Auditorium';
+  contactPerson: string;
+  status: 'active' | 'maintenance';
+  image?: string;
+}
+
+export interface ArtistSocialLinks {
+  spotify?: string;
+  instagram?: string;
+  youtube?: string;
+  appleMusic?: string;
+  twitter?: string;
+}
+
+export interface ArtistManagement {
+  managerName?: string;
+  agency?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface ArtistRider {
+  microphonePreference?: string;
+  inEarMonitors?: string;
+  hospitalityNotes?: string;
+  stagePlotNotes?: string;
+}
+
+export interface Artist {
+  id: string;
+  name: string;
+  stageName?: string;
+  genre: string;
+  subGenres?: string[];
+  avatar: string;
+  bannerImage?: string;
+  bio: string;
+  country: string;
+  city?: string;
+  monthlyListeners?: string;
+  status: 'touring' | 'active' | 'available' | 'on-break';
+  socialLinks?: ArtistSocialLinks;
+  management?: ArtistManagement;
+  rider?: ArtistRider;
+  totalConcerts?: number;
+  upcomingConcerts?: number;
+  verified?: boolean;
 }
 
 

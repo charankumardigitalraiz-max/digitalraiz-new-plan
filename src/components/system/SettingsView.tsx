@@ -194,7 +194,7 @@ export const SettingsView = ({ currentUser, onSave }: SettingsViewProps) => {
         <div className="pt-2 flex justify-end">
           <button
             onClick={handleSave}
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-medium text-white shadow-xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-medium text-white shadow-xs transition-all cursor-pointer"
           >
             <Save className="h-3.5 w-3.5" />
             <span>Save Preferences</span>

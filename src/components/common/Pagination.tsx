@@ -12,6 +12,7 @@ export interface PaginationProps {
   showPageSizeOptions?: boolean;
   showItemCount?: boolean;
   itemName?: string;
+  activeColor?: string;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -24,7 +25,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   className = '',
   showPageSizeOptions = true,
   showItemCount = true,
-  itemName = 'items'
+  itemName = 'items',
+  activeColor = 'pagination-active-tab'
 }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
@@ -108,7 +110,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(1)}
           disabled={safeCurrentPage <= 1}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           title="First Page"
         >
           <ChevronsLeft className="h-3.5 w-3.5" />
@@ -118,7 +120,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(safeCurrentPage - 1)}
           disabled={safeCurrentPage <= 1}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           title="Previous Page"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
@@ -139,8 +141,8 @@ export const Pagination: React.FC<PaginationProps> = ({
               <button
                 key={`page-${p}`}
                 onClick={() => onPageChange(Number(p))}
-                className={`min-w-[28px] h-7 px-2 text-xs rounded-lg font-medium transition-all cursor-pointer ${isCurrent
-                  ? 'pagination-active-tab font-semibold border border-indigo-200/80 shadow-2xs'
+                className={`min-w-[28px] h-7 px-2 text-xs rounded-md font-medium transition-all cursor-pointer ${isCurrent
+                  ? `${activeColor} font-semibold border border-indigo-200/80 shadow-2xs`
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
                   }`}
               >
@@ -154,7 +156,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(safeCurrentPage + 1)}
           disabled={safeCurrentPage >= totalPages}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           title="Next Page"
         >
           <ChevronRight className="h-3.5 w-3.5" />
@@ -164,7 +166,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={safeCurrentPage >= totalPages}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          className="p-1.5 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           title="Last Page"
         >
           <ChevronsRight className="h-3.5 w-3.5" />

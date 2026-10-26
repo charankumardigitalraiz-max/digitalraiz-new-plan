@@ -178,10 +178,10 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold tracking-tight text-white">
+                <h2 className="text-base font-semibold tracking-tight text-white">
                   Live Emergency SOS & Incident Dispatch
                 </h2>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white text-rose-700 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-white text-rose-700 shadow-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-rose-600 animate-ping" />
                   {activeIncidents.length} Active Emergency Alerts
                 </span>
@@ -195,7 +195,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="h-8 w-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
+              className="h-8 w-8 rounded-md bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -212,33 +212,30 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setFilter('all')}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                    filter === 'all'
+                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${filter === 'all'
                       ? 'bg-slate-900 text-white shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   All ({incidents.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setFilter('active')}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                    filter === 'active'
-                      ? 'bg-rose-600 text-white shadow-2xs font-bold'
+                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${filter === 'active'
+                      ? 'bg-rose-600 text-white shadow-2xs font-semibold'
                       : 'text-rose-700 hover:bg-rose-50'
-                  }`}
+                    }`}
                 >
                   Active ({activeIncidents.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setFilter('resolved')}
-                  className={`px-2.5 py-1 rounded-lg font-medium transition-all cursor-pointer ${
-                    filter === 'resolved'
+                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${filter === 'resolved'
                       ? 'bg-slate-900 text-white shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   Resolved
                 </button>
@@ -255,27 +252,25 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                   <div
                     key={incident.id}
                     onClick={() => setSelectedIncidentId(incident.id)}
-                    className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
-                      isSelected
+                    className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${isSelected
                         ? 'border-rose-400 bg-white shadow-md ring-2 ring-rose-200/50'
                         : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-2xs'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-mono text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className="font-mono text-[11px] font-semibold text-slate-800 flex items-center gap-1.5">
                         {isCritical && incident.status === 'active' && (
                           <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
                         )}
                         #{incident.id}
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                          incident.status === 'active'
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${incident.status === 'active'
                             ? 'bg-rose-100 text-rose-700 border border-rose-200'
                             : incident.status === 'dispatched'
-                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                            : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                        }`}
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          }`}
                       >
                         {incident.status}
                       </span>
@@ -311,15 +306,14 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs font-bold text-slate-500">
+                      <span className="font-mono text-xs font-semibold text-slate-500">
                         INCIDENT #{selectedIncident.id}
                       </span>
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          selectedIncident.severity === 'critical'
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${selectedIncident.severity === 'critical'
                             ? 'bg-red-500 text-white animate-pulse'
                             : 'bg-amber-500 text-white'
-                        }`}
+                          }`}
                       >
                         {selectedIncident.severity} Severity
                       </span>
@@ -328,7 +322,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                         Reported {selectedIncident.reportedAt}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900">
+                    <h3 className="text-lg font-semibold text-slate-900">
                       {selectedIncident.title}
                     </h3>
                   </div>
@@ -338,33 +332,30 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleUpdateStatus(selectedIncident.id, 'active')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        selectedIncident.status === 'active'
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${selectedIncident.status === 'active'
                           ? 'bg-rose-600 text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                        }`}
                     >
                       Active
                     </button>
                     <button
                       type="button"
                       onClick={() => handleUpdateStatus(selectedIncident.id, 'dispatched')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        selectedIncident.status === 'dispatched'
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${selectedIncident.status === 'dispatched'
                           ? 'bg-amber-600 text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                        }`}
                     >
                       Dispatched
                     </button>
                     <button
                       type="button"
                       onClick={() => handleUpdateStatus(selectedIncident.id, 'resolved')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        selectedIncident.status === 'resolved'
+                      className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${selectedIncident.status === 'resolved'
                           ? 'bg-emerald-600 text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                        }`}
                     >
                       Resolved
                     </button>
@@ -373,7 +364,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
 
                 {/* Primary Quick Emergency Dispatch Action Buttons */}
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                     Direct Highway Dispatch & Emergency Triggers
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -420,7 +411,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-rose-600" />
-                      <span className="text-xs font-bold text-slate-800">
+                      <span className="text-xs font-semibold text-slate-800">
                         GPS Telematics & Corridor Position
                       </span>
                     </div>
@@ -444,7 +435,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                   <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-2">
                     <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                       <Car className="h-4 w-4 text-emerald-600" />
-                      <span className="text-xs font-bold text-slate-900">Vehicle & Driver Details</span>
+                      <span className="text-xs font-semibold text-slate-900">Vehicle & Driver Details</span>
                     </div>
                     <div className="text-xs space-y-1.5 pt-1">
                       <div className="flex justify-between">
@@ -461,7 +452,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-400">License Plate:</span>
-                        <span className="font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">
+                        <span className="font-mono font-semibold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">
                           {selectedIncident.vehiclePlate}
                         </span>
                       </div>
@@ -472,7 +463,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                   <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-2">
                     <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                       <Users className="h-4 w-4 text-indigo-600" />
-                      <span className="text-xs font-bold text-slate-900">Passenger & Emergency Contact</span>
+                      <span className="text-xs font-semibold text-slate-900">Passenger & Emergency Contact</span>
                     </div>
                     <div className="text-xs space-y-1.5 pt-1">
                       <div className="flex justify-between">
@@ -497,7 +488,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
 
                 {/* Corridor Emergency Radio Broadcast Form */}
                 <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 space-y-2.5">
-                  <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
+                  <div className="flex items-center gap-2 text-amber-900 font-semibold text-xs">
                     <Radio className="h-4 w-4 text-amber-600" />
                     <span>Broadcast Emergency Safety Alert to Active Drivers in Corridor</span>
                   </div>
@@ -513,7 +504,7 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
                     <button
                       type="submit"
                       disabled={isBroadcastSent || !broadcastMessage.trim()}
-                      className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0"
+                      className="px-4 py-2 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-semibold text-xs shadow-xs transition-all cursor-pointer shrink-0"
                     >
                       {isBroadcastSent ? 'Dispatched!' : 'Broadcast Alert'}
                     </button>

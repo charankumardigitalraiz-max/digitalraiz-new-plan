@@ -131,6 +131,11 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
     }
   }, [externalDrivers]);
 
+
+  // const handleNavigateToUser = (driver: Driver) => {
+  //   navigate(`/users/${driver.id}`);
+  // };
+
   // Load detailed driver from API when modal opens
   useEffect(() => {
     if (!inspectingDriver) {
@@ -327,20 +332,20 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
         <div className="flex items-center gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            onClick={() => setInspectingDriver(driver)}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-indigo-50 border border-indigo-200/80 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer text-xs font-medium"
+            onClick={() => handleNavigateToUser(driver)}
+            className="flex items-center gap-1 rounded-md px-2.5 py-1.5 bg-indigo-50 border border-indigo-200/80 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer text-xs font-medium"
             title="Inspect Driver Documents & Verification"
           >
             <Eye className="h-3.5 w-3.5" />
-            <span>Inspect</span>
+            {/* <span>Inspect</span> */}
           </button>
 
-          {driver.verificationStatus === 'pending' ? (
+          {/* {driver.verificationStatus === 'pending' ? (
             <>
               <button
                 type="button"
                 onClick={() => handleVerify(driver.id, 'verified')}
-                className="flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-2.5 py-1.5 text-xs font-medium text-white transition-all cursor-pointer shadow-2xs"
+                className="flex items-center gap-1 rounded-md bg-emerald-600 hover:bg-emerald-700 px-2.5 py-1.5 text-xs font-medium text-white transition-all cursor-pointer shadow-2xs"
                 title="Approve Driver Verification"
               >
                 <Check className="h-3.5 w-3.5" />
@@ -349,7 +354,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
               <button
                 type="button"
                 onClick={() => handleVerify(driver.id, 'rejected')}
-                className="flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
+                className="flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
                 title="Reject Driver Verification"
               >
                 <X className="h-3.5 w-3.5" />
@@ -365,12 +370,12 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                   driver.verificationStatus === 'verified' ? 'pending' : 'verified'
                 )
               }
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
+              className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer"
               title={driver.verificationStatus === 'verified' ? 'Reset to Pending Review' : 'Re-verify Driver'}
             >
               {driver.verificationStatus === 'verified' ? 'Re-audit' : 'Re-verify'}
             </button>
-          )}
+          )} */}
         </div>
       )
     }
@@ -396,7 +401,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
       </div>
 
       {/* Metric Highlights */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <MetricCard
           label="Verified Drivers"
           value={verifiedCount}
@@ -418,13 +423,13 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
           icon={Users}
           accentColor="indigo"
         />
-        <MetricCard
+        {/* <MetricCard
           label="Fleet Avg Rating"
           value={`${avgRating} ★`}
           isPositive={true}
           icon={Star}
           accentColor="purple"
-        />
+        /> */}
       </div>
 
       {/* Unified Attached Card: Header, Controls & List */}
@@ -462,16 +467,16 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                 onChange={(e) => setStatusFilter(e.target.value as 'all' | 'verified' | 'pending' | 'rejected')}
                 className="appearance-none h-10 rounded-lg border border-slate-200 bg-slate-50/70 pl-9 pr-9 py-2 text-xs sm:text-[13px] font-medium text-slate-700 outline-none transition-all hover:bg-white focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100 cursor-pointer shadow-2xs"
               >
-                <option value="all">All Verification Statuses ({totalCount})</option>
-                <option value="pending">Pending Review ({pendingCount})</option>
-                <option value="verified">Verified ({verifiedCount})</option>
-                <option value="rejected">Rejected ({rejectedCount})</option>
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending Review </option>
+                <option value="verified">Verified </option>
+                <option value="rejected">Rejected </option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 h-10">
+            {/* <div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 h-10">
               <button
                 type="button"
                 onClick={() => setViewMode('table')}
@@ -496,37 +501,37 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                 <LayoutGrid className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Cards</span>
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
         {/* Card Body: Direct Table or Cards View with 100% Dynamic Server Pagination */}
         <div className="p-4">
-          {viewMode === 'table' ? (
-            <Table
-              data={driverList}
-              columns={columns}
-              keyExtractor={(driver) => driver.id}
-              emptyMessage="No drivers found"
-              emptySubtext="New driver applications will appear here for verification and auditing."
-              emptyIcon={ShieldCheck}
-              isLoading={isLoading}
-              pagination={{
-                currentPage,
-                pageSize,
-                totalItems: totalDrivers,
-                onPageChange: setCurrentPage,
-                onPageSizeChange: (newSize) => {
-                  setPageSize(newSize);
-                  setCurrentPage(1);
-                },
-                pageSizeOptions: [5, 10, 20, 50],
-                itemName: 'drivers',
-                autoSlice: false
-              }}
-            />
-          ) : (
-            <div className="space-y-3.5">
+          {/* {viewMode === 'table' ? ( */}
+          <Table
+            data={driverList}
+            columns={columns}
+            keyExtractor={(driver) => driver.id}
+            emptyMessage="No drivers found"
+            emptySubtext="New driver applications will appear here for verification and auditing."
+            emptyIcon={ShieldCheck}
+            isLoading={isLoading}
+            pagination={{
+              currentPage,
+              pageSize,
+              totalItems: totalDrivers,
+              onPageChange: setCurrentPage,
+              onPageSizeChange: (newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              },
+              pageSizeOptions: [5, 10, 20, 50],
+              itemName: 'drivers',
+              autoSlice: false
+            }}
+          />
+          {/* ) : ( */}
+          {/* <div className="space-y-3.5">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-2 bg-white rounded-xl border border-slate-200/90">
                   <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
@@ -547,7 +552,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                       key={driver.id}
                       className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs transition-all hover:border-slate-300"
                     >
-                      {/* Driver Identity */}
+                    
                       <div className="flex items-center gap-3.5 min-w-[240px]">
                         <img
                           src={driver.avatar}
@@ -572,7 +577,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                         </div>
                       </div>
 
-                      {/* Vehicle Profile */}
+             
                       <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2">
                         <Car className="h-5 w-5 text-indigo-600 shrink-0" />
                         <div className="text-xs">
@@ -583,7 +588,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                         </div>
                       </div>
 
-                      {/* KYC & License Info */}
+                 
                       <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2">
                         <FileText className="h-4 w-4 text-emerald-600 shrink-0" />
                         <div className="text-xs">
@@ -594,12 +599,12 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                         </div>
                       </div>
 
-                      {/* Approvals Action */}
+                   
                       <div className="flex items-center gap-2 w-full lg:w-auto justify-end">
                         <button
                           type="button"
                           onClick={() => setInspectingDriver(driver)}
-                          className="flex items-center gap-1.5 rounded-lg border border-indigo-200/80 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white px-3 py-1.5 text-xs font-medium transition-all cursor-pointer shadow-2xs"
+                          className="flex items-center gap-1.5 rounded-md border border-indigo-200/80 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white px-3 py-1.5 text-xs font-medium transition-all cursor-pointer shadow-2xs"
                         >
                           <Eye className="h-3.5 w-3.5" />
                           <span>Inspect</span>
@@ -610,7 +615,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                             <button
                               type="button"
                               onClick={() => handleVerify(driver.id, 'verified')}
-                              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 text-xs font-medium text-white transition-all cursor-pointer shadow-xs"
+                              className="flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 text-xs font-medium text-white transition-all cursor-pointer shadow-xs"
                             >
                               <Check className="h-3.5 w-3.5" />
                               <span>Approve</span>
@@ -618,7 +623,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                             <button
                               type="button"
                               onClick={() => handleVerify(driver.id, 'rejected')}
-                              className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
+                              className="flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
                             >
                               <X className="h-3.5 w-3.5" />
                               <span>Reject</span>
@@ -633,7 +638,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                                 driver.verificationStatus === 'verified' ? 'pending' : 'verified'
                               )
                             }
-                            className="rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                            className="rounded-md border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
                           >
                             {driver.verificationStatus === 'verified' ? 'Re-audit' : 'Re-verify'}
                           </button>
@@ -661,7 +666,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                 </div>
               )}
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -700,7 +705,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
               <button
                 type="button"
                 onClick={() => setInspectingDriver(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
+                className="rounded-md p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -867,7 +872,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                           <button
                             type="button"
                             onClick={() => setIsEditingKyc(false)}
-                            className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
+                            className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 cursor-pointer"
                           >
                             Cancel
                           </button>
@@ -875,7 +880,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                             type="button"
                             disabled={actionProcessing}
                             onClick={handleSaveKycCredentials}
-                            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3.5 py-1.5 text-xs font-medium text-white transition-all cursor-pointer disabled:opacity-50"
+                            className="flex items-center gap-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 px-3.5 py-1.5 text-xs font-medium text-white transition-all cursor-pointer disabled:opacity-50"
                           >
                             <Save className="h-3.5 w-3.5" />
                             <span>Save Credentials</span>
@@ -975,7 +980,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                   type="button"
                   disabled={actionProcessing}
                   onClick={() => handleVerify(inspectingDriver.id, 'rejected')}
-                  className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-white hover:bg-rose-50 text-rose-700 px-3.5 py-2 text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md border border-rose-200 bg-white hover:bg-rose-50 text-rose-700 px-3.5 py-2 text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
                 >
                   <X className="h-3.5 w-3.5" />
                   <span>Reject</span>
@@ -990,7 +995,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                       inspectingDriver.verificationStatus === 'pending' ? 'verified' : 'pending'
                     )
                   }
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3.5 py-2 text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 px-3.5 py-2 text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   <span>
@@ -1004,7 +1009,7 @@ export const DriverVerificationScreen: React.FC<DriverVerificationScreenProps> =
                   type="button"
                   disabled={actionProcessing}
                   onClick={() => handleVerify(inspectingDriver.id, 'verified')}
-                  className="flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-medium transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-medium transition-all cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   <Check className="h-3.5 w-3.5" />
                   <span>Approve Driver</span>

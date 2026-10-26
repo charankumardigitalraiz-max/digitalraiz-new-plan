@@ -276,7 +276,7 @@ export const ModuleAnalyticsCharts = ({
                   <span className="text-[9px] font-medium text-slate-400 uppercase tracking-wider truncate max-w-[85px]">
                     {activeSegment ? activeSegment.route.split(' ')[0] : 'Total GMV'}
                   </span>
-                  <span className="text-sm font-bold text-slate-900 leading-tight">
+                  <span className="text-sm font-semibold text-slate-900 leading-tight">
                     {activeSegment
                       ? `${activeSegment.percentage}%`
                       : `₹${(totalRevenue / 1000).toFixed(1)}k`}
@@ -299,8 +299,8 @@ export const ModuleAnalyticsCharts = ({
                       onMouseEnter={() => setHoveredSegment(seg.id)}
                       onMouseLeave={() => setHoveredSegment(null)}
                       className={`p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${isHovered
-                          ? 'border-emerald-300 bg-emerald-50/60 shadow-2xs'
-                          : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100/70'
+                        ? 'border-emerald-300 bg-emerald-50/60 shadow-2xs'
+                        : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100/70'
                         }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -319,7 +319,7 @@ export const ModuleAnalyticsCharts = ({
                       </div>
 
                       <div className="text-right shrink-0 ml-2">
-                        <div className="text-[11px] font-bold text-slate-900">
+                        <div className="text-[11px] font-semibold text-slate-900">
                           {seg.percentage}%
                         </div>
                         <div className="text-[9.5px] font-medium text-emerald-600">
@@ -420,7 +420,7 @@ export const ModuleAnalyticsCharts = ({
 
                           {/* Percentage Badge atop column */}
                           <span
-                            className={`text-[10px] font-bold mb-1 transition-all ${isHovered ? 'scale-110 font-extrabold' : ''
+                            className={`text-[10px] font-semibold mb-1 transition-all ${isHovered ? 'scale-110 font-extrabold' : ''
                               } ${c.textAccent}`}
                           >
                             {c.percentage}%

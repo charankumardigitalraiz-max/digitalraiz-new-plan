@@ -195,7 +195,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsModuleMenuOpen(!isModuleMenuOpen)}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs group focus:outline-none"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-slate-200/90 bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all cursor-pointer shadow-2xs group focus:outline-none"
               aria-label="Select Platform Module"
             >
               <div className={`flex h-7 w-7 items-center justify-center rounded-lg border ${activeModule.accent} shadow-2xs shrink-0`}>
@@ -234,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({
                         key={mod.id}
                         type="button"
                         onClick={() => handleSelectModule(mod.path)}
-                        className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all cursor-pointer group ${isSelected
+                        className={`w-full flex items-center justify-between p-2 rounded-md text-left transition-all cursor-pointer group ${isSelected
                           ? 'bg-indigo-50/80 border border-indigo-200/80 shadow-2xs'
                           : 'hover:bg-slate-50 border border-transparent'
                           }`}
@@ -275,7 +275,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* <button
             type="button"
             onClick={() => setIsSosModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-all font-semibold text-xs shadow-2xs cursor-pointer group shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-all font-semibold text-xs shadow-2xs cursor-pointer group shrink-0"
             aria-label="Emergency SOS Incidents"
             title="Emergency SOS Incident Response"
           >
@@ -284,8 +284,8 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
             </span>
             <ShieldAlert className="h-4 w-4 text-rose-600 group-hover:scale-110 transition-transform" />
-            <span className="font-bold tracking-wider">SOS</span>
-            <span className="ml-0.5 rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none shadow-2xs">
+            <span className="font-semibold tracking-wider">SOS</span>
+            <span className="ml-0.5 rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-semibold text-white leading-none shadow-2xs">
               2
             </span>
           </button> */}
@@ -293,7 +293,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Notifications */}
           <div className="relative">
             <button
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
               aria-label="Notifications"
             >
               <Bell className="h-4 w-4" />
@@ -305,7 +305,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative pl-2 border-l border-slate-200" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer text-left focus:outline-none"
+              className="flex items-center gap-2.5 p-1 rounded-md hover:bg-slate-100 transition-colors cursor-pointer text-left focus:outline-none"
               aria-expanded={isUserMenuOpen}
               aria-haspopup="true"
             >
@@ -345,7 +345,7 @@ export const Header: React.FC<HeaderProps> = ({
                       setIsUserMenuOpen(false);
                       onLogout?.();
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Log Out from Panel</span>

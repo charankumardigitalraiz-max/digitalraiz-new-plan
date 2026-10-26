@@ -244,7 +244,7 @@ export const RideDetailModal: React.FC<RideDetailModalProps> = ({
                     onStatusChange(ride.id, 'completed');
                     onClose();
                   }}
-                  className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-normal text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-normal text-emerald-700 hover:bg-emerald-100 transition-all cursor-pointer"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   Mark Trip Completed
@@ -254,7 +254,7 @@ export const RideDetailModal: React.FC<RideDetailModalProps> = ({
                     onStatusChange(ride.id, 'cancelled');
                     onClose();
                   }}
-                  className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-normal text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-normal text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
                 >
                   <XCircle className="h-3.5 w-3.5" />
                   Cancel Ride
@@ -263,7 +263,7 @@ export const RideDetailModal: React.FC<RideDetailModalProps> = ({
             )}
             <button
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-slate-100 px-4 py-1.5 text-xs font-normal text-slate-600 hover:bg-slate-200 transition-all cursor-pointer"
+              className="rounded-md border border-slate-200 bg-slate-100 px-4 py-1.5 text-xs font-normal text-slate-600 hover:bg-slate-200 transition-all cursor-pointer"
             >
               Close
             </button>

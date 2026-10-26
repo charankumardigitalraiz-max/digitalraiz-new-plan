@@ -230,7 +230,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                 key={t}
                 type="button"
                 onClick={() => setTimeframe(t)}
-                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${timeframe === t
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${timeframe === t
                   ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                   : 'hover:text-slate-900'
                   }`}
@@ -368,7 +368,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-200 text-slate-700 text-[10px] font-bold">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-200 text-slate-700 text-[10px] font-semibold">
                         #{idx + 1}
                       </span>
                       <span className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors">
@@ -379,7 +379,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-bold text-slate-900">{currencySymbol}{corridor.avgPrice}</span>
+                      <span className="text-xs font-semibold text-slate-900">{currencySymbol}{corridor.avgPrice}</span>
                       <span className="text-[10px] text-slate-400 block">per seat</span>
                     </div>
                   </div>
@@ -510,15 +510,15 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
 
             <div className="grid grid-cols-3 gap-2 text-center my-3">
               <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-100">
-                <div className="text-base font-bold text-emerald-700">{verifiedCount}</div>
+                <div className="text-base font-semibold text-emerald-700">{verifiedCount}</div>
                 <div className="text-[10px] font-medium text-emerald-600">Verified</div>
               </div>
               <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-100">
-                <div className="text-base font-bold text-amber-700">{pendingCount}</div>
+                <div className="text-base font-semibold text-amber-700">{pendingCount}</div>
                 <div className="text-[10px] font-medium text-amber-600">Pending Review</div>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-base font-bold text-slate-700">{totalFleetCount}</div>
+                <div className="text-base font-semibold text-slate-700">{totalFleetCount}</div>
                 <div className="text-[10px] font-medium text-slate-500">Total Fleet</div>
               </div>
             </div>
@@ -534,7 +534,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
                 <button
                   type="button"
                   onClick={() => onNavigateSubTab('verifications')}
-                  className="rounded-lg bg-amber-600 hover:bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs shrink-0 cursor-pointer transition-colors"
+                  className="rounded-md bg-amber-600 hover:bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-white shadow-2xs shrink-0 cursor-pointer transition-colors"
                 >
                   Review
                 </button>
@@ -605,7 +605,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
 
                 <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                   <div className="text-right">
-                    <div className="text-xs font-bold text-slate-900">{currencySymbol}{ride.pricePerSeat}</div>
+                    <div className="text-xs font-semibold text-slate-900">{currencySymbol}{ride.pricePerSeat}</div>
                     <div className="text-[11px] text-emerald-600 font-medium">
                       {ride.availableSeats} of {ride.totalSeats} seats open
                     </div>
@@ -665,7 +665,7 @@ export const CarpoolOverview: React.FC<CarpoolOverviewProps> = ({
           <button
             type="button"
             onClick={() => onNavigateSubTab('verifications')}
-            className="mt-4 w-full py-2 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            className="mt-4 w-full py-2 px-3 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
             <span>Manage All {totalFleetCount} Drivers & KYC</span>

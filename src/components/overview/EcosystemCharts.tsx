@@ -431,7 +431,7 @@ export const EcosystemCharts = ({
           {/* Quick Metrics Bar with Live Value & Module Distribution Badges */}
           <div className="mt-3.5 flex flex-wrap items-baseline justify-between gap-3">
             <div className="flex items-baseline gap-2.5">
-              <span className="text-2xl font-bold tracking-tight text-slate-900">
+              <span className="text-2xl font-semibold tracking-tight text-slate-900">
                 {metric === 'revenue'
                   ? `₹${displayCurrentTotal.toLocaleString()}`
                   : `${displayCurrentTotal.toLocaleString()} bookings`}
@@ -667,7 +667,7 @@ export const EcosystemCharts = ({
               >
                 <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 mb-1.5 flex items-center justify-between">
                   <span>{pointsCurrent[hoveredDataIndex].data.fullDate}</span>
-                  <span className="font-bold text-indigo-600">
+                  <span className="font-semibold text-indigo-600">
                     {metric === 'revenue'
                       ? `₹${pointsCurrent[hoveredDataIndex].val.toLocaleString()}`
                       : `${pointsCurrent[hoveredDataIndex].val}`}
@@ -807,7 +807,7 @@ export const EcosystemCharts = ({
                     >
                       {activeDonut.name}
                     </span>
-                    <span className="text-base font-bold tracking-tight text-slate-900 my-0.5">
+                    <span className="text-base font-semibold tracking-tight text-slate-900 my-0.5">
                       {metric === 'revenue'
                         ? `₹${(activeDonut.value / 1000).toFixed(1)}k`
                         : `${activeDonut.value.toLocaleString()}`}
@@ -827,7 +827,7 @@ export const EcosystemCharts = ({
                     <span className="text-[10px] font-semibold tracking-wide uppercase text-slate-400">
                       Total {metric === 'revenue' ? 'GMV' : 'Bookings'}
                     </span>
-                    <span className="text-base font-bold tracking-tight text-slate-900 my-0.5">
+                    <span className="text-base font-semibold tracking-tight text-slate-900 my-0.5">
                       {metric === 'revenue'
                         ? `₹${(totalMetricCurrent / 1000).toFixed(1)}k`
                         : `${totalMetricCurrent.toLocaleString()}`}
@@ -859,7 +859,7 @@ export const EcosystemCharts = ({
                       style={{ backgroundColor: activeDonut.color }}
                     />
                     <span className="font-semibold">{activeDonut.name}:</span>
-                    <span className="font-bold text-white">
+                    <span className="font-semibold text-white">
                       {metric === 'revenue'
                         ? `₹${(activeDonut.value / 1000).toFixed(1)}k`
                         : `${activeDonut.value.toLocaleString()}`}
